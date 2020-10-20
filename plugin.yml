@@ -1,0 +1,28 @@
+name: KingsUHC
+main: kings\uhcrun\UHCRun
+version: 1.0-beta
+description: uhc for mini zeus g
+api: 3.0.0
+author: LiTEK
+twitter: LiTEK_
+
+permissions:
+  uhc.cmd:
+    description: Main permission
+    default: true
+    children:
+      uhc.cmd.help:
+        description: help permission
+        default: true
+      uhc.cmd.arenas:
+        description: arenas list permission
+        default: op
+      uhc.cmd.set:
+        description: set command permission
+        default: op
+      uhc.cmd.create:
+        description: create command permission
+        default: op
+      uhc.cmd.remove:
+        description: remove command permission
+        default: op

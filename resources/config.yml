@@ -1,0 +1,11 @@
+# !-- KingsUHC Configuration file
+
+# This allow to set one or more arenas in server
+max_arenas: 1
+
+# Sets the max scenarios number in a game, scenarios # will be selected acording to votes
+max_scenarios: 2
+
+# Discord connector allow to send messages to a discord server through a webhooks
+# Raw string connector or false to disable
+discord_connector: false
