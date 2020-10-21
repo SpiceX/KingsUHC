@@ -19,10 +19,7 @@
 declare(strict_types=1);
 namespace kings\uhc\provider;
 
-use kings\uhc\arena\Arena;
 use kings\uhc\KingsUHC;
-use pocketmine\level\Level;
-use pocketmine\utils\Config;
 
 
 class YamlDataProvider extends Provider
@@ -30,8 +27,12 @@ class YamlDataProvider extends Provider
 
 	/** @var KingsUHC $plugin */
 	private $plugin;
+	/** @var int */
+    private $maxArenas;
+    /** @var int */
+    private $maxScenarios;
 
-	/**
+    /**
 	 * YamlDataProvider constructor.
 	 * @param KingsUHC $plugin
 	 */
@@ -39,7 +40,6 @@ class YamlDataProvider extends Provider
 	{
 		$this->plugin = $plugin;
 		$this->init();
-		$this->loadArenas();
 	}
 
 	public function init()
@@ -53,31 +53,13 @@ class YamlDataProvider extends Provider
 		if (!is_dir($this->getDataFolder() . "saves")) {
 			@mkdir($this->getDataFolder() . "saves");
 		}
+		$this->maxArenas = (int)$this->plugin->getConfig()->get('max_arenas', 1);
+		$this->maxScenarios = (int)$this->plugin->getConfig()->get('max_scenarios', 2);
 	}
 
-	public function loadArenas()
-	{
-		foreach (glob($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . "*.yml") as $arenaFile) {
-			$config = new Config($arenaFile, Config::YAML);
-			$this->plugin->arenas[basename($arenaFile, ".yml")] = new Arena($this->plugin, $config->getAll(\false));
-		}
-	}
-
-	public function saveArenas()
-	{
-		foreach ($this->plugin->arenas as $fileName => $arena) {
-			if ($arena->level instanceof Level) {
-				foreach ($arena->players as $player) {
-					$player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
-				}
-				// must be reseted
-				$arena->mapReset->loadMap($arena->level->getFolderName(), true);
-			}
-			$config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
-			$config->setAll($arena->data);
-			$config->save();
-		}
-	}
+	public function getMaxArenas(){
+	    return $this->maxArenas;
+    }
 
 	/**
 	 * @return string $dataFolder
@@ -86,4 +68,12 @@ class YamlDataProvider extends Provider
 	{
 		return $this->plugin->getDataFolder();
 	}
+
+    /**
+     * @return int
+     */
+    public function getMaxScenarios(): int
+    {
+        return $this->maxScenarios;
+    }
 }

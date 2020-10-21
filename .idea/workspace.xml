@@ -20,36 +20,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bff09cc0-786d-4dec-baa1-553ae04465e3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/$CACHE_FILE$" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/UHCRun.iml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jsonSchemas.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/plugin.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/UHCRun.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/arena/Arena.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/arena/ArenaScheduler.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/arena/MapReset.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/bossbar/BossBar.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/commands/MainCommand.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/entities/MainEntity.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/events/MainEvents.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/FormManager.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/elements/Button.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/elements/Element.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/elements/Image.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/types/Form.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/forms/types/MenuForm.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/math/Time.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/math/Vector3.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/provider/YamlDataProvider.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/scoreboard/Scoreboard.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/scoreboard/ScoreboardStore.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/litek/uhcrun/utils/PluginUtils.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/CpsCounter.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/CpsCounter.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,6 +106,9 @@
     </include_path>
   </component>
   <component name="ProjectId" id="1j6iaVPbWoMKNp3dHofYkbIHElF" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -128,10 +116,10 @@
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="reference.webide.settings.project.settings.php.composer" />
+    <property name="php.override.implement.member.chooser.php.doc" value="NONE" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -143,7 +131,11 @@
       <option name="presentableId" value="Default" />
       <updated>1603131005547</updated>
       <workItem from="1603131006563" duration="6824000" />
-      <workItem from="1603154239869" duration="1450000" />
+      <workItem from="1603154239869" duration="2330000" />
+      <workItem from="1603156904177" duration="6029000" />
+      <workItem from="1603299932313" duration="182000" />
+      <workItem from="1603301462318" duration="2670000" />
+      <workItem from="1603304515881" duration="2385000" />
     </task>
     <servers />
   </component>
@@ -167,29 +159,41 @@
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="440" y="159" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.738@0.0.1366.738" timestamp="1603136507197" />
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser" timestamp="1603302292563">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser/0.0.1366.738@0.0.1366.738" timestamp="1603302292563" />
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1603131109215">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1366.738@0.0.1366.738" timestamp="1603131109215" />
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603131954215">
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603306588008">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603131954215" />
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603306588008" />
     <state x="463" y="124" key="FileChooserDialogImpl" timestamp="1603131042462">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="463" y="124" key="FileChooserDialogImpl/0.0.1366.738@0.0.1366.738" timestamp="1603131042462" />
-    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603137068605">
+    <state x="559" y="271" key="Github.ShareDialog" timestamp="1603155765039">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603137068605" />
-    <state x="184" y="14" key="SettingsEditor" timestamp="1603131053155">
+    <state x="559" y="271" key="Github.ShareDialog/0.0.1366.738@0.0.1366.738" timestamp="1603155765039" />
+    <state x="499" y="0" key="Github.UntrackedFilesDialog" timestamp="1603155771649">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="184" y="14" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1603131053155" />
-    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603155336757">
+    <state x="499" y="0" key="Github.UntrackedFilesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603155771649" />
+    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603302280339">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603155336757" />
+    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603302280339" />
+    <state x="184" y="14" key="SettingsEditor" timestamp="1603157166114">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="184" y="14" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1603157166114" />
+    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603157606828">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603157606828" />
   </component>
 </project>

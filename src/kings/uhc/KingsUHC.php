@@ -20,19 +20,15 @@ declare(strict_types=1);
 namespace kings\uhc;
 
 
-use Exception;
-use kings\uhc\arena\Arena;
-use kings\uhc\arena\MapReset;
+use kings\uhc\arena\ArenaManager;
 use kings\uhc\commands\MainCommand;
 use kings\uhc\entities\Leaderboard;
 use kings\uhc\forms\FormManager;
-use kings\uhc\math\Vector3;
 use kings\uhc\provider\YamlDataProvider;
 use kings\uhc\utils\BossBar;
+use kings\uhc\utils\CpsCounter;
 use pocketmine\entity\Entity;
 use pocketmine\event\Listener;
-use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 
 class KingsUHC extends PluginBase implements Listener
@@ -46,6 +42,10 @@ class KingsUHC extends PluginBase implements Listener
 	public $dataProvider;
     /** @var BossBar */
     private $bossbar;
+    /** @var ArenaManager */
+    private $arenaManager;
+    /** @var CpsCounter */
+    private $cpsCounter;
 
 
     public function onEnable()
@@ -53,12 +53,11 @@ class KingsUHC extends PluginBase implements Listener
 		self::$instance = $this;
 		Entity::registerEntity(Leaderboard::class, true, ['Leaderboard']);
 		$this->getServer()->getCommandMap()->register('uhc', new MainCommand($this));
-		$this->registerEvents();
+		$this->getServer()->getPluginManager()->registerEvents(new UHCListener($this), $this);
 		$this->formManager = new FormManager($this);
 		$this->dataProvider = new YamlDataProvider($this);
-		$this->getServer()->getLogger()->info("§6uhc enabled!");
-		$this->getServer()->getLogger()->info("§9LICENSE: §7CU4MA-2JG1N-44EGQ-9VNGZ-Q60UD");
-		$this->getServer()->getLogger()->info("§aPlugin made by §b@kings_");
+		$this->arenaManager = new ArenaManager($this);
+        $this->cpsCounter = new CpsCounter($this);
 	}
 
 	public function onLoad()
@@ -68,19 +67,8 @@ class KingsUHC extends PluginBase implements Listener
 
 	public function onDisable()
 	{
-		$this->dataProvider->saveArenas();
+		$this->arenaManager->saveArenas();
 	}
-
-	private function registerEvents()
-	{
-		$events = [new MainEvents($this)];
-		foreach ($events as $event) {
-			$this->getServer()->getPluginManager()->registerEvents($event, $this);
-		}
-		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		unset($events);
-	}
-
 
 	/**
 	 * @return KingsUHC
@@ -96,5 +84,21 @@ class KingsUHC extends PluginBase implements Listener
     public function getBossbar(): BossBar
     {
         return $this->bossbar;
+    }
+
+    /**
+     * @return ArenaManager
+     */
+    public function getArenaManager(): ArenaManager
+    {
+        return $this->arenaManager;
+    }
+
+    /**
+     * @return CpsCounter
+     */
+    public function getCpsCounter(): CpsCounter
+    {
+        return $this->cpsCounter;
     }
 }

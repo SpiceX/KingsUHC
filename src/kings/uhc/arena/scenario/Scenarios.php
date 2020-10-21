@@ -21,4 +21,6 @@ interface Scenarios
     public const BLAST_MINING = 'BlastMining';
     public const CAT_EYES = 'CatEyes';
     public const GAMBLE = 'Gamble';
+    public const DOUBLE_ORES = 'DoubleOres';
+    public const TREE_CAPITATOR = 'TreeCapitator';
 }

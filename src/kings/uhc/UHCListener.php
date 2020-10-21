@@ -11,6 +11,19 @@ use pocketmine\Player;
 
 class UHCListener implements Listener
 {
+
+    /** @var KingsUHC */
+    private $plugin;
+
+    /**
+     * UHCListener constructor.
+     * @param KingsUHC $plugin
+     */
+    public function __construct(KingsUHC $plugin)
+    {
+        $this->plugin = $plugin;
+    }
+
     /**
      * @param EntityDamageByEntityEvent $event
      */

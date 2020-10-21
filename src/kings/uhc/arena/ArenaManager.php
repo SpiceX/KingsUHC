@@ -1,8 +1,6 @@
 <?php
 
-
 namespace kings\uhc\arena;
-
 
 use Exception;
 use kings\uhc\KingsUHC;
@@ -10,6 +8,7 @@ use kings\uhc\math\Vector3;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\level\Level;
+use pocketmine\utils\Config;
 
 class ArenaManager implements Listener
 {
@@ -29,7 +28,62 @@ class ArenaManager implements Listener
     public function __construct(KingsUHC $plugin)
     {
         $this->plugin = $plugin;
+        $this->loadArenas();
+        $plugin->getServer()->getPluginManager()->registerEvents($this, $plugin);
     }
+
+    public function loadArenas()
+    {
+        foreach (glob($this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . "*.yml") as $arenaFile) {
+            $config = new Config($arenaFile, Config::YAML);
+            $this->arenas[basename($arenaFile, ".yml")] = new Arena($this->plugin, $config->getAll(false));
+        }
+    }
+
+    public function saveArenas()
+    {
+        foreach ($this->arenas as $fileName => $arena) {
+            if ($arena->level instanceof Level) {
+                foreach ($arena->players as $player) {
+                    $player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
+                }
+                // must be reseted
+                $arena->mapReset->loadMap($arena->level->getFolderName(), true);
+            }
+            $config = new Config($this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
+            $config->setAll($arena->data);
+            $config->save();
+        }
+    }
+
+    /**
+     * @param string $identifier
+     * @return Arena|null
+     */
+    public function getArena(string $identifier): ?Arena
+    {
+        return $this->arenas[$identifier] ?? null;
+    }
+
+    /**
+     * @param string $identifier
+     * @param Arena $arena
+     */
+    public function registerArena(string $identifier, Arena $arena): void
+    {
+        $this->arenas[$identifier] = $arena;
+    }
+
+    /**
+     * @param string $identifier
+     */
+    public function removeArena(string $identifier)
+    {
+        if (isset($this->arenas[$identifier])) {
+            unset($this->arenas[$identifier]);
+        }
+    }
+
 
     /**
      * @param PlayerChatEvent $event
@@ -49,21 +103,21 @@ class ArenaManager implements Listener
 
         switch ($args[0]) {
             case "help":
-                $player->sendMessage("§a> SkyWars setup help (1/1):\n" .
-                    "§7help : Displays list of available setup commands\n" .
-                    "§7slots : Updates arena slots\n" .
-                    "§7level : Sets arena level\n" .
-                    "§7deathmatch : Sets arena deathmatch\n" .
-                    "§7savelevel : Saves the arena level\n" .
-                    "§7enable : Enables the arena");
+                $player->sendMessage("§8-------(§6Setup Help §7(§e1§7/§e1§7)§8)-------\n" .
+                    "§ehelp : §7Displays list of available setup commands\n" .
+                    "§eslots : §7Updates arena slots\n" .
+                    "§elevel : §7Sets arena level\n" .
+                    "§ecenter : §7Sets arena center\n" .
+                    "§esavelevel : §7Saves the arena level\n" .
+                    "§eenable : §7Enables the arena");
                 break;
             case "slots":
                 if (!isset($args[1])) {
-                    $player->sendMessage("§cUsage: §7slots <int: slots>");
+                    $player->sendMessage("§c§l» §r§7Usage: §7slots <int: slots>");
                     break;
                 }
                 $arena->data["slots"] = (int)$args[1];
-                $player->sendMessage("§a> Slots updated to $args[1]!");
+                $player->sendMessage("§a§l» §r§7Slots updated to $args[1]!");
                 break;
             case "level":
                 if (!isset($args[1])) {
@@ -71,24 +125,24 @@ class ArenaManager implements Listener
                     break;
                 }
                 if (!$this->plugin->getServer()->isLevelGenerated($args[1])) {
-                    $player->sendMessage("§c> Level $args[1] does not found!");
+                    $player->sendMessage("§c§l» §r§7Level $args[1] does not found!");
                     break;
                 }
-                $player->sendMessage("§a> Arena level updated to $args[1]!");
+                $player->sendMessage("§a§l» §r§7Arena level updated to $args[1]!");
                 $arena->data["level"] = $args[1];
                 break;
             case "center":
                 $arena->data["center"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
-                $player->sendMessage("§a> Center set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
+                $player->sendMessage("§a§l» §r§7Center set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
                 break;
             case "savelevel":
                 if (!$arena->level instanceof Level) {
                     $levelName = $arena->data["level"];
                     if (!is_string($levelName) || !$this->plugin->getServer()->isLevelGenerated($levelName)) {
                         errorMessage:
-                        $player->sendMessage("§c> Error while saving the level: world not found.");
+                        $player->sendMessage("§c§l» §r§7Error while saving the level: world not found.");
                         if ($arena->setup) {
-                            $player->sendMessage("§6> Try save level after enabling the arena.");
+                            $player->sendMessage("§6§l» §r§7Try save level after enabling the arena.");
                         }
                         return;
                     }
@@ -101,7 +155,7 @@ class ArenaManager implements Listener
                             goto errorMessage;
                         }
                         $arena->mapReset->saveMap($this->plugin->getServer()->getLevelByName($levelName));
-                        $player->sendMessage("§a> Level saved!");
+                        $player->sendMessage("§a§l» §r§7Level saved!");
                     } catch (Exception $exception) {
                         goto errorMessage;
                     }
@@ -110,12 +164,12 @@ class ArenaManager implements Listener
                 break;
             case "enable":
                 if (!$arena->setup) {
-                    $player->sendMessage("§6> Arena is already enabled!");
+                    $player->sendMessage("§6§l» §r§7Arena is already enabled!");
                     break;
                 }
 
                 if (!$arena->enable(false)) {
-                    $player->sendMessage("§c> Could not load arena, there are missing information!");
+                    $player->sendMessage("§c§l» §r§7Could not load arena, there are missing information!");
                     break;
                 }
 
@@ -128,20 +182,28 @@ class ArenaManager implements Listener
                 }
 
                 $arena->loadArena(false);
-                $player->sendMessage("§a> Arena enabled!");
+                $player->sendMessage("§a§l» §r§7Arena enabled!");
                 break;
             case "done":
-                $player->sendMessage("§a> You have successfully left setup mode!");
+                $player->sendMessage("§a§l» §r§7You have successfully left setup mode!");
                 unset($this->setters[$player->getName()]);
                 if (isset($this->setupData[$player->getName()])) {
                     unset($this->setupData[$player->getName()]);
                 }
                 break;
             default:
-                $player->sendMessage("§6> You are in setup mode.\n" .
-                    "§7- use §lhelp §r§7to display available commands\n" .
-                    "§7- or §ldone §r§7to leave setup mode");
+                $player->sendMessage("§8---------(§6Setup Mode§8)---------.\n" .
+                    "§6- §7use §l§ehelp §rto display available commands\n" .
+                    "§6- §7or §l§edone §rto leave setup mode");
                 break;
         }
+    }
+
+    /**
+     * @return Arena[]
+     */
+    public function getArenas(): array
+    {
+        return $this->arenas;
     }
 }

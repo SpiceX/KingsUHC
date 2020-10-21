@@ -4,6 +4,7 @@
 namespace kings\uhc\utils;
 
 
+use kings\uhc\KingsUHC;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
@@ -19,12 +20,30 @@ class CpsCounter implements Listener
 
     /** @var array[] */
     private $clicksData = [];
+    /** @var KingsUHC */
+    private $plugin;
 
+    /**
+     * CpsCounter constructor.
+     * @param KingsUHC $plugin
+     */
+    public function __construct(KingsUHC $plugin)
+    {
+        $this->plugin = $plugin;
+        $plugin->getServer()->getPluginManager()->registerEvents($this, $plugin);
+    }
+
+    /**
+     * @param Player $p
+     */
     public function initPlayerClickData(Player $p): void
     {
         $this->clicksData[$p->getLowerCaseName()] = [];
     }
 
+    /**
+     * @param Player $p
+     */
     public function addClick(Player $p): void
     {
         array_unshift($this->clicksData[$p->getLowerCaseName()], microtime(true));
@@ -50,21 +69,33 @@ class CpsCounter implements Listener
             })) / $deltaTime, $roundPrecision);
     }
 
+    /**
+     * @param Player $p
+     */
     public function removePlayerClickData(Player $p): void
     {
         unset($this->clicksData[$p->getLowerCaseName()]);
     }
 
+    /**
+     * @param PlayerJoinEvent $e
+     */
     public function playerJoin(PlayerJoinEvent $e): void
     {
         $this->initPlayerClickData($e->getPlayer());
     }
 
+    /**
+     * @param PlayerQuitEvent $e
+     */
     public function playerQuit(PlayerQuitEvent $e): void
     {
         $this->removePlayerClickData($e->getPlayer());
     }
 
+    /**
+     * @param DataPacketReceiveEvent $e
+     */
     public function packetReceive(DataPacketReceiveEvent $e): void
     {
         if (

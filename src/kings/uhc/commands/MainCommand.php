@@ -17,11 +17,13 @@
  */
 
 declare(strict_types=1);
+
 namespace kings\uhc\commands;
 
 
 use kings\uhc\arena\Arena;
-use kings\uhc\entities\MainEntity;
+use kings\uhc\arena\ArenaManager;
+use kings\uhc\entities\Leaderboard;
 use kings\uhc\KingsUHC;
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginCommand;
@@ -31,153 +33,178 @@ use pocketmine\Player;
 
 class MainCommand extends PluginCommand implements PluginIdentifiableCommand
 {
-	/**
-	 * @var KingsUHC
-	 */
-	private $plugin;
+    /**
+     * @var KingsUHC
+     */
+    private $plugin;
 
-	/**
-	 * MainCommand constructor.
-	 * @param KingsUHC $plugin
-	 */
-	public function __construct(KingsUHC $plugin)
-	{
-		parent::__construct("uhc", $plugin);
-		$this->setAliases(['uhc', 'uhc', 'uhr']);
-		$this->setDescription('uhc command');
-		$this->setUsage('§c/uhc help');
-		$this->setPermission("uhc.cmd");
-		$this->plugin = $plugin;
-	}
+    /**
+     * MainCommand constructor.
+     * @param KingsUHC $plugin
+     */
+    public function __construct(KingsUHC $plugin)
+    {
+        parent::__construct("uhc", $plugin);
+        $this->setAliases(['uhc']);
+        $this->setDescription('get uhc help for plugin');
+        $this->setUsage('§c/uhc help');
+        $this->setPermission("uhc.cmd");
+        $this->plugin = $plugin;
+    }
 
-	/**
-	 * @param CommandSender $sender
-	 * @param string $commandLabel
-	 * @param array $args
-	 * @return bool|mixed|void
-	 */
-	public function execute(CommandSender $sender, string $commandLabel, array $args)
-	{
-		if ($sender instanceof Player) {
-			if (isset($args[0])) {
-				switch ($args[0]) {
-					case 'join':
-						/** @var Arena $arena */
-						$arena = $this->plugin->arenas[$args[1]];
-						$arena->joinToArena($sender);
-					case 'npc':
-						if ($sender->isOp()) {
-							foreach ($sender->getLevel()->getEntities() as $entity) {
-								if ($entity instanceof MainEntity) {
-									$entity->close();
-								}
-							}
-							$nbt = Entity::createBaseNBT($sender->asVector3());
-							$nbt->setTag(clone $sender->namedtag->getCompoundTag('Skin'));
-							$npc = new MainEntity($sender->getLevel(), $nbt);
-							$npc->spawnToAll();
-						}
-						break;
-					case "set":
-						if (!$sender->hasPermission("uhc.cmd.set")) {
-							$sender->sendMessage("§6uhc » §7You have not permissions to use this command!");
-							break;
-						}
-						if (!$sender instanceof Player) {
-							$sender->sendMessage("§6uhc » §7 This command can be used only in-game!");
-							break;
-						}
-						if (!isset($args[1])) {
-							$sender->sendMessage("§cUsage: §7/uhr set <arenaName>");
-							break;
-						}
-						if (isset($this->plugin->setters[$sender->getName()])) {
-							$sender->sendMessage("§6uhc » §7You are already in setup mode!");
-							break;
-						}
-						if (!isset($this->plugin->arenas[$args[1]])) {
-							$sender->sendMessage("§6uhc » §7Arena $args[1] does not found!");
-							break;
-						}
-						$sender->sendMessage("§6> You are joined setup mode.\n" .
-							"§7- use §lhelp §r§7to display available commands\n" .
-							"§7- or §ldone §r§7to leave setup mode");
-						$this->plugin->setters[$sender->getName()] = $this->plugin->arenas[$args[1]];
-						break;
-					case "create":
-						if (!$sender->hasPermission("uhc.cmd.create")) {
-							$sender->sendMessage("§6uhc » §7You have not permissions to use this command!");
-							break;
-						}
-						if (!isset($args[1])) {
-							$sender->sendMessage("§cUsage: §7/uhc create <arenaName>");
-							break;
-						}
-						if (isset($this->plugin->arenas[$args[1]])) {
-							$sender->sendMessage("§6uhc » §7 Arena $args[1] already exists!");
-							break;
-						}
-						$this->plugin->arenas[$args[1]] = new Arena($this->plugin, []);
-						$sender->sendMessage("§6uhc » §7 Arena $args[1] created!");
-						break;
-					case "remove":
-						if (!$sender->hasPermission("uhc.cmd.remove")) {
-							$sender->sendMessage("§6uhc » §7You have not permissions to use this command!");
-							break;
-						}
-						if (!isset($args[1])) {
-							$sender->sendMessage("§cUsage: §7/uhr remove <arenaName>");
-							break;
-						}
-						if (!isset($this->plugin->arenas[$args[1]])) {
-							$sender->sendMessage("§6uhc » §7Arena $args[1] was not found!");
-							break;
-						}
+    /**
+     * @param CommandSender $sender
+     * @param string $commandLabel
+     * @param array $args
+     * @return bool|mixed|void
+     */
+    public function execute(CommandSender $sender, string $commandLabel, array $args)
+    {
+        if ($sender instanceof Player) {
+            if (isset($args[0])) {
+                switch ($args[0]) {
+                    case 'help':
+                        if (!$sender->isOp()) {
+                            $sender->sendMessage("§8---------(§6Setup Mode§8)---------.\n" .
+                                "§6/uhc join §7- Join a UHC Game\n" .
+                                "§6/uhc help §7- Help for UHC\n"
+                            );
+                        } else {
+                            $sender->sendMessage("§8---------(§6Setup Mode§8)---------.\n" .
+                                "§6/uhc join §7- Join a UHC Game\n" .
+                                "§6/uhc help §7- Help for UHC\n" .
+                                "§6/uhc tops §7- Place the leaderboard\n" .
+                                "§6/uhc create §7- Create UHC Arenas\n" .
+                                "§6/uhc set §7- Configure an UHC Arena\n" .
+                                "§6/uhc remove §7- Delete permanently an UHC Arena\n" .
+                                "§6/uhc arenas §7- See the available arena list\n"
+                            );
+                        }
+                        break;
+                    case 'join':
+                        /** @var Arena $arena */
+                        $arena = $this->getArenaManager()->getArenas()[$args[1]];
+                        $arena->joinToArena($sender);
+                        break;
+                    case 'tops':
+                        if ($sender->isOp()) {
+                            foreach ($sender->getLevel()->getEntities() as $entity) {
+                                if ($entity instanceof Leaderboard) {
+                                    $entity->close();
+                                }
+                            }
+                            $nbt = Entity::createBaseNBT($sender->asVector3());
+                            $nbt->setTag(clone $sender->namedtag->getCompoundTag('Skin'));
+                            $npc = new Leaderboard($sender->getLevel(), $nbt);
+                            $npc->spawnToAll();
+                        }
+                        $sender->sendMessage("§8[§9Kings§fUHC§8] §7Leaderboard has been placed.");
+                        break;
+                    case "set":
+                        if (!$sender->hasPermission("uhc.cmd.set")) {
+                            $sender->sendMessage("§c§l» §r§7You have not permissions to use this command!");
+                            break;
+                        }
+                        if (!$sender instanceof Player) {
+                            $sender->sendMessage("§c§l» §r§7 This command can be used only in-game!");
+                            break;
+                        }
+                        if (!isset($args[1])) {
+                            $sender->sendMessage("§cUsage: §7/uhc set <arenaName>");
+                            break;
+                        }
+                        if (isset($this->plugin->setters[$sender->getName()])) {
+                            $sender->sendMessage("§c§l» §r§7You are already in setup mode!");
+                            break;
+                        }
+                        if (!isset($this->getArenaManager()->getArenas()[$args[1]])) {
+                            $sender->sendMessage("§c§l» §r§7Arena $args[1] does not found!");
+                            break;
+                        }
+                        $sender->sendMessage("§8---------(§6Setup Mode§8)---------.\n" .
+                            "§6- §7use §l§ehelp §rto display available commands\n" .
+                            "§6- §7or §l§edone §rto leave setup mode");
+                        $this->getArenaManager()->setters[$sender->getName()] = $this->getArenaManager()->getArenas()[$args[1]];
+                        break;
+                    case "create":
+                        if (!$sender->hasPermission("uhc.cmd.create")) {
+                            $sender->sendMessage("§c§l» §r§7You have not permissions to use this command!");
+                            break;
+                        }
+                        if (!isset($args[1])) {
+                            $sender->sendMessage("§cUsage: §7/uhc create <arenaName>");
+                            break;
+                        }
+                        if ($this->getArenaManager()->getArena($args[1]) !== null) {
+                            $sender->sendMessage("§c§l» §r§7 Arena $args[1] already exists!");
+                            break;
+                        }
+                        $this->getArenaManager()->registerArena($args[1], new Arena($this->plugin, []));
+                        $sender->sendMessage("§a§l» §r§7 Arena $args[1] created!");
+                        break;
+                    case "remove":
+                        if (!$sender->hasPermission("uhc.cmd.remove")) {
+                            $sender->sendMessage("§c§l» §r§7You have not permissions to use this command!");
+                            break;
+                        }
+                        if (!isset($args[1])) {
+                            $sender->sendMessage("§cUsage: §7/uhr remove <arenaName>");
+                            break;
+                        }
+                        if ($this->getArenaManager()->getArena($args[1]) === null) {
+                            $sender->sendMessage("§c§l» §r§7Arena $args[1] was not found!");
+                            break;
+                        }
 
-						/** @var Arena $arena */
-						$arena = $this->plugin->arenas[$args[1]];
+                        $arena = $this->getArenaManager()->removeArena($args[1]);
 
-						foreach ($arena->players as $player) {
-							$player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-						}
+                        foreach ($arena->players as $player) {
+                            $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+                        }
 
-						if (is_file($file = $this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $args[1] . ".yml")) unlink($file);
-						unset($this->plugin->arenas[$args[1]]);
+                        if (is_file($file = $this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $args[1] . ".yml")) {
+                            @unlink($file);
+                        }
 
-						$sender->sendMessage("§6uhc » Arena removed!");
-						break;
-					case "arenas":
-						if (!$sender->hasPermission("uhc.cmd.arenas")) {
-							$sender->sendMessage("§cYou have not permissions to use this command!");
-							break;
-						}
-						if (count($this->plugin->arenas) === 0) {
-							$sender->sendMessage("§6> There are 0 arenas.");
-							break;
-						}
-						$list = "§7> Arenas:\n";
-						foreach ($this->plugin->arenas as $name => $arena) {
-							if ($arena->setup) {
-								$list .= "§7- $name : §cdisabled\n";
-							} else {
-								$list .= "§7- $name : §aenabled\n";
-							}
-						}
-						$sender->sendMessage($list);
-						break;
-					case 'info':
-						$sender->sendMessage("§6uhc 1.0-beta.");
-						$sender->sendMessage("§b> Plugin made by @kings_");
-						break;
-					default:
-						if (!$sender->hasPermission("uhc.cmd.help")) {
-							$sender->sendMessage("§cYou have not permissions to use this command!");
-							break;
-						}
-						$sender->sendMessage("§cUsage: §7/uhc help");
-						break;
-				}
-			}
-		}
-	}
+                        $sender->sendMessage("§a§l» §rArena removed!");
+                        break;
+                    case "arenas":
+                        if (!$sender->hasPermission("uhc.cmd.arenas")) {
+                            $sender->sendMessage("§c§l» §r§7You have not permissions to use this command!");
+                            break;
+                        }
+                        if (count($this->getArenaManager()->getArenas()) === 0) {
+                            $sender->sendMessage("§c§l» §r§7There are 0 arenas.");
+                            break;
+                        }
+                        $list = "§8-------(§6Arenas§8)-------:\n";
+                        foreach ($this->getArenaManager()->getArenas() as $name => $arena) {
+                            if ($arena->setup) {
+                                $list .= "§7- $name : §cdisabled\n";
+                            } else {
+                                $list .= "§7- $name : §aenabled\n";
+                            }
+                        }
+                        $sender->sendMessage($list);
+                        break;
+                    default:
+                        if (!$sender->hasPermission("uhc.cmd.help")) {
+                            $sender->sendMessage("§c§l» §r§7You have not permissions to use this command!");
+                            break;
+                        }
+                        $sender->sendMessage("§c§l» §r§7/uhc help");
+                        break;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @return ArenaManager
+     */
+    public function getArenaManager(): ArenaManager
+    {
+        return $this->plugin->getArenaManager();
+    }
 }

@@ -1,6 +1,6 @@
 # !-- KingsUHC Configuration file
 
-# This allow to set one or more arenas in server
+# This allow to create one or more arenas in server
 max_arenas: 1
 
 # Sets the max scenarios number in a game, scenarios # will be selected acording to votes

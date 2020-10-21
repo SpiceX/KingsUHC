@@ -1,7 +1,7 @@
 name: KingsUHC
-main: kings\uhcrun\UHCRun
+main: kings\uhc\KingsUHC
 version: 1.0-beta
-description: uhc for mini zeus g
+description: UHC Private plugin for KingsCraft
 api: 3.0.0
 author: LiTEK
 twitter: LiTEK_

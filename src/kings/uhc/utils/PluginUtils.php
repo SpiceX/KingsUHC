@@ -20,6 +20,10 @@ declare(strict_types=1);
 namespace kings\uhc\utils;
 
 
+use kings\uhc\math\Vector3;
+use pocketmine\block\Block;
+use pocketmine\item\Item;
+use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 
 class PluginUtils
@@ -30,108 +34,52 @@ class PluginUtils
 
 	public const spaceChar = ' ';
 
-	public const charWidths = [
-		' ' => 4,
-		'!' => 2,
-		'"' => 5,
-		'\'' => 3,
-		'(' => 5,
-		')' => 5,
-		'*' => 5,
-		',' => 2,
-		'.' => 2,
-		':' => 2,
-		';' => 2,
-		'<' => 5,
-		'>' => 5,
-		'@' => 7,
-		'I' => 4,
-		'[' => 4,
-		']' => 4,
-		'f' => 5,
-		'i' => 2,
-		'k' => 5,
-		'l' => 3,
-		't' => 4,
-		'' => 5,
-		'|' => 2,
-		'~' => 7,
-		'█' => 9,
-		'░' => 8,
-		'▒' => 9,
-		'▓' => 9,
-		'▌' => 5,
-		'─' => 9
-	];
+    /**
+     * @param Player $player
+     * @param Block $block
+     * @return int
+     */
+    public static function destroyTree(Player $player, Block $block)
+    {
+        $damage = 0;
+        if ($block->getId() != Block::WOOD) {
+            return $damage;
+        }
+        $down = $block->getSide(Vector3::SIDE_DOWN);
+        if ($down->getId() == Block::WOOD) {
+            return $damage;
+        }
 
-	/**
-	 * @param string $input
-	 * @return string
-	 */
-	public static function centerLine(string $input): string
-	{
-		return self::centerText($input, self::lineLength * self::charWidth);
-	}
+        $level = $block->getLevel();
 
-	/**
-	 * @param string $input
-	 * @param int $maxLength
-	 * @param bool $addRightPadding
-	 * @return string
-	 */
-	public static function centerText(string $input, int $maxLength = 0, bool $addRightPadding = false): string
-	{
-		$lines = explode("\n", trim($input));
+        $cX = $block->getX();
+        $cY = $block->getY();
+        $cZ = $block->getZ();
 
-		$sortedLines = $lines;
-		usort($sortedLines, static function (string $a, string $b) {
-			return self::getPixelLength($b) <=> self::getPixelLength($a);
-		});
+        for ($y = $cY + 1; $y < 128; ++$y) {
+            if ($level->getBlockIdAt($cX, $y, $cZ) == Block::AIR){
+                break;
+            }
+            for ($x = $cX - 4; $x <= $cX + 4; ++$x) {
+                for ($z = $cZ - 4; $z <= $cZ + 4; ++$z) {
+                    $block = $level->getBlock(new Vector3($x, $y, $z));
 
-		$longest = $sortedLines[0];
+                    if ($block->getId() !== Block::WOOD && $block->getId() !== Block::LEAVES) {
+                        continue;
+                    }
 
-		if ($maxLength === 0) {
-			$maxLength = self::getPixelLength($longest);
-		}
+                    ++$damage;
+                    if ($block->getId() === Block::WOOD){
+                        if ($player->getInventory()->canAddItem(Item::get(Item::WOOD))){
+                            $player->getInventory()->addItem(Item::get(Item::WOOD, 0, mt_rand(1,2)));
+                        }
+                    }
 
-		$result = '';
-
-		$spaceWidth = self::getCharWidth(self::spaceChar);
-
-		foreach ($lines as $sortedLine) {
-			$len = max($maxLength - self::getPixelLength($sortedLine), 0);
-			$padding = (int)round($len / (2 * $spaceWidth));
-			$paddingRight = (int)floor($len / (2 * $spaceWidth));
-			$result .= str_pad(self::spaceChar, $padding) . $sortedLine . ($addRightPadding ? str_pad(self::spaceChar, $paddingRight) : '') . "\n";
-		}
-
-		$result = rtrim($result, "\n");
-
-		return $result;
-	}
-
-	/**
-	 * @param string $line
-	 * @return int
-	 */
-	public static function getPixelLength(string $line): int
-	{
-		$length = 0;
-		foreach (str_split(TextFormat::clean($line)) as $c) {
-			$length += self::getCharWidth($c);
-		}
-
-		// +1 for each bold character
-		$length += substr_count($line, TextFormat::BOLD);
-		return $length;
-	}
-
-	/**
-	 * @param string $c
-	 * @return int
-	 */
-	private static function getCharWidth(string $c): int
-	{
-		return self::charWidths[$c] ?? self::charWidth;
-	}
+                    $level->setBlockIdAt($x, $y, $z, 0);
+                    $level->setBlockDataAt($x, $y, $z, 0);
+                }
+            }
+        }
+        return $damage;
+    }
 }
