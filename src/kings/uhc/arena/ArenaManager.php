@@ -3,6 +3,7 @@
 namespace kings\uhc\arena;
 
 use Exception;
+use kings\uhc\arena\utils\MapReset;
 use kings\uhc\KingsUHC;
 use kings\uhc\math\Vector3;
 use pocketmine\event\Listener;
@@ -37,6 +38,8 @@ class ArenaManager implements Listener
         foreach (glob($this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . "*.yml") as $arenaFile) {
             $config = new Config($arenaFile, Config::YAML);
             $this->arenas[basename($arenaFile, ".yml")] = new Arena($this->plugin, $config->getAll(false));
+            $this->plugin->getJoinGameQueue()->arenas[basename($arenaFile, '.yml')] = [];
+            $this->plugin->getJoinGameQueue()->startingTimes[basename($arenaFile, '.yml')] = 10;
         }
     }
 
@@ -197,6 +200,19 @@ class ArenaManager implements Listener
                     "§6- §7or §l§edone §rto leave setup mode");
                 break;
         }
+    }
+
+    /**
+     * @return Arena|null
+     */
+    public function getAvailableArena(): ?Arena
+    {
+        foreach ($this->arenas as $arena) {
+            if ($arena->phase === Arena::PHASE_LOBBY && count($arena->players) < (int)$arena->data['slots']){
+                return $arena;
+            }
+        }
+        return null;
     }
 
     /**

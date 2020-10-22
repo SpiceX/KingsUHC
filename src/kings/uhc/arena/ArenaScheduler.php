@@ -20,12 +20,9 @@ declare(strict_types=1);
 
 namespace kings\uhc\arena;
 
-use kings\uhc\math\Time;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\level\particle\RedstoneParticle;
-use pocketmine\level\sound\AnvilUseSound;
-use pocketmine\level\sound\ClickSound;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\scheduler\Task;
@@ -34,8 +31,8 @@ use pocketmine\scheduler\Task;
 class ArenaScheduler extends Task
 {
 
-    /** @var Arena $plugin */
-    protected $plugin;
+    /** @var Arena $arena */
+    protected $arena;
 
     /** @var int $startTime */
     public $startTime = 40;
@@ -54,11 +51,11 @@ class ArenaScheduler extends Task
 
     /**
      * ArenaScheduler constructor.
-     * @param Arena $plugin
+     * @param Arena $arena
      */
-    public function __construct(Arena $plugin)
+    public function __construct(Arena $arena)
     {
-        $this->plugin = $plugin;
+        $this->arena = $arena;
     }
 
     /**
@@ -66,46 +63,11 @@ class ArenaScheduler extends Task
      */
     public function onRun(int $currentTick)
     {
-        if ($this->plugin->setup) return;
-        switch ($this->plugin->phase) {
-            case Arena::PHASE_LOBBY:
-                if (count($this->plugin->players) >= 10) {
-                    $this->plugin->broadcastMessage("§a» Starting in " . Time::calculateTime($this->startTime) . " sec «", Arena::MSG_TIP);
-                    $this->startTime--;
-                    if ($this->startTime == 0) {
-                        $this->plugin->startGame();
-                        foreach ($this->plugin->players as $player) {
-                            $this->plugin->level->addSound(new AnvilUseSound($player->asVector3()));
-                        }
-                    } else {
-                        foreach ($this->plugin->players as $player) {
-                            $this->plugin->level->addSound(new ClickSound($player->asVector3()));
-                        }
-                    }
-                } else {
-                    $this->plugin->broadcastMessage("§c» Waiting players «", Arena::MSG_TIP);
-                    $this->startTime = 40;
-                }
-                break;
+        if ($this->arena->setup) return;
+        switch ($this->arena->phase) {
             case Arena::PHASE_GAME:
-                $this->plugin->scoreboard->removeLines();
-                $this->plugin->scoreboard->setLine(2, " §b" . date('d/m/Y'));
-                if (!$this->plugin->pvpEnabled) {
-                    $this->plugin->scoreboard->setLine(3, " §aEnabling pvp in: " . Time::calculateTime($this->pvpTime));
-                } else {
-                    if ($this->plugin->deathmatch) {
-                        $this->plugin->scoreboard->setLine(3, " §4Deathmatch");
-                    } else {
-                        $this->plugin->scoreboard->setLine(3, " §aDeathmatch in: " . Time::calculateTime($this->gameTime - (60 * 2)));
-                    }
-                }
-                $this->plugin->scoreboard->setLine(4, " §eMap: §b" . $this->plugin->level->getFolderName());
-                $this->plugin->scoreboard->setLine(6, " §eMode:§a Solo");
-                $this->plugin->scoreboard->setLine(8, " §eminelcgames.sytes.net:25271");
-                foreach ($this->plugin->players as $player) {
-                    $this->plugin->bossbar->updateFor($player, "§f§lTime: §a" . Time::calculateTime($this->gameTime));
-                    $this->plugin->scoreboard->showTo($player);
-                    $aabb = new AxisAlignedBB($this->plugin->minX, 0, $this->plugin->minZ, $this->plugin->maxX, $this->plugin->level->getWorldHeight(), $this->plugin->maxZ);
+                foreach ($this->arena->players as $player) {
+                    $aabb = new AxisAlignedBB($this->arena->minX, 0, $this->arena->minZ, $this->arena->maxX, $this->arena->level->getWorldHeight(), $this->arena->maxZ);
                     if (!$aabb->isVectorInXZ($player->getLocation())) {
                         for ($i = 0; $i < 20; ++$i) {
                             $vector = self::getRandomVector()->multiply(3);
@@ -118,60 +80,56 @@ class ArenaScheduler extends Task
                 }
                 switch ($this->gameTime) {
                     case 14 * 60:
-                        $this->plugin->pvpEnabled = true;
-                        $this->plugin->broadcastMessage("§6uhc » §7PvP has been enabled!");
-                        $this->plugin->broadcastMessage("§6uhc »§7The edge will be reduced 90 blocks in 4 minutes!");
+                        $this->arena->pvpEnabled = true;
+                        $this->arena->broadcastMessage("§6uhc » §7PvP has been enabled!");
+                        $this->arena->broadcastMessage("§6uhc »§7The edge will be reduced 90 blocks in 4 minutes!");
                         break;
                     case 10 * 60:
-                        $this->plugin->shrinkEdge(90);
-                        $this->plugin->broadcastMessage("§6uhc »§7The border has been shortened by 90 blocks!");
-                        $this->plugin->broadcastMessage("§6uhc »§7The edge will be reduced 90 blocks in 3 minutes!");
+                        $this->arena->shrinkEdge(90);
+                        $this->arena->broadcastMessage("§6uhc »§7The border has been shortened by 90 blocks!");
+                        $this->arena->broadcastMessage("§6uhc »§7The edge will be reduced 90 blocks in 3 minutes!");
                         break;
                     case 7 * 60:
-                        $this->plugin->shrinkEdge(90);
-                        $this->plugin->broadcastMessage("§6uhc »§7The edge will be reduced 20 blocks in 1 minute!");
+                        $this->arena->shrinkEdge(90);
+                        $this->arena->broadcastMessage("§6uhc »§7The edge will be reduced 20 blocks in 1 minute!");
                         break;
                     case 6 * 60:
-                        $this->plugin->shrinkEdge(20);
-                        $this->plugin->broadcastMessage("§6uhc »§7The border has been shortened by 20 blocks!");
-                        $this->plugin->broadcastMessage("§6uhc » §7Deathmatch in 5 min.");
+                        $this->arena->shrinkEdge(20);
+                        $this->arena->broadcastMessage("§6uhc »§7The border has been shortened by 20 blocks!");
+                        $this->arena->broadcastMessage("§6uhc » §7Deathmatch in 5 min.");
                         break;
                     case 3 * 60:
-                        $this->plugin->broadcastMessage("§6uhc » §7Deathmatch in 2 min.");
+                        $this->arena->broadcastMessage("§6uhc » §7Deathmatch in 2 min.");
                         break;
                     case 1 * 60:
-                        $this->plugin->deathmatch = true;
-                        $this->plugin->startDeathmatch();
+                        $this->arena->deathmatch = true;
                         break;
                 }
-                if ($this->plugin->checkEnd()) {
-                    $this->plugin->startRestart();
+                if ($this->arena->checkEnd()) {
+                    $this->arena->startRestart();
                 }
-                if (count($this->plugin->players) >= 2 && $this->gameTime <= 0) {
-                    $this->plugin->startRestart(false);
+                if (count($this->arena->players) >= 2 && $this->gameTime <= 0) {
+                    $this->arena->startRestart(false);
                 }
                 $this->gameTime--;
                 $this->pvpTime--;
                 break;
             case Arena::PHASE_RESTART:
-                $this->plugin->broadcastMessage("§6uhc » §7Restarting in {$this->restartTime} sec.", Arena::MSG_TIP);
+                $this->arena->broadcastMessage("§6uhc » §7Restarting in {$this->restartTime} sec.", Arena::MSG_TIP);
                 $this->restartTime--;
 
                 switch ($this->restartTime) {
                     case 0:
-                        foreach ($this->plugin->players as $player) {
-                            $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-
+                        foreach ($this->arena->players as $player) {
+                            $player->teleport($this->arena->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
                             $player->getInventory()->clearAll();
                             $player->getArmorInventory()->clearAll();
                             $player->getCursorInventory()->clearAll();
-                            $this->plugin->bossbar->hideFrom($player);
                             $player->setFood(20);
                             $player->setHealth(20);
-
-                            $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
+                            $player->setGamemode($this->arena->plugin->getServer()->getDefaultGamemode());
                         }
-                        $this->plugin->loadArena(true);
+                        $this->arena->loadArena(true);
                         $this->reloadTimer();
                         break;
                 }
@@ -197,7 +155,7 @@ class ArenaScheduler extends Task
     public function reloadTimer()
     {
         $this->pvpTime = 6 * 60;
-        $this->plugin->pvpEnabled = false;
+        $this->arena->pvpEnabled = false;
         $this->startTime = 30;
         $this->gameTime = 30 * 60;
         $this->restartTime = 10;

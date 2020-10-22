@@ -7,6 +7,7 @@ namespace kings\uhc;
 use kings\uhc\entities\Leaderboard;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\Player;
 
 class UHCListener implements Listener
@@ -34,5 +35,11 @@ class UHCListener implements Listener
         if ($player instanceof Player && $npc instanceof Leaderboard) {
             $event->setCancelled(true);
         }
+    }
+
+    public function onPlayerQuit(PlayerQuitEvent $event)
+    {
+        $player = $event->getPlayer();
+        $this->plugin->getJoinGameQueue()->leaveQueue($player);
     }
 }

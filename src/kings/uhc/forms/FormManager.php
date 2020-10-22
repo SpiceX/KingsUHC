@@ -17,10 +17,12 @@
  */
 
 declare(strict_types=1);
+
 namespace kings\uhc\forms;
 
 
 use kings\uhc\arena\Arena;
+use kings\uhc\arena\ArenaManager;
 use kings\uhc\forms\elements\Button;
 use kings\uhc\forms\elements\Image;
 use kings\uhc\forms\types\MenuForm;
@@ -30,43 +32,54 @@ use pocketmine\Player;
 class FormManager
 {
 
-	/**
-	 * @var KingsUHC
-	 */
-	private $plugin;
+    /**
+     * @var KingsUHC
+     */
+    private $plugin;
 
-	public function __construct(KingsUHC $plugin)
-	{
-		$this->plugin = $plugin;
-	}
+    public function __construct(KingsUHC $plugin)
+    {
+        $this->plugin = $plugin;
+    }
 
-	public function sendUHCPanel(Player $player)
-	{
-		$player->sendForm(new MenuForm("§c§lUHC RUN PANEL", "§7Select an option: ",
-			[
-				new Button("§6UHC RUN [Select Maps]", new Image("textures/items/book_written", Image::TYPE_PATH))
-			], function (Player $player, Button $selected): void {
-				$this->sendArenasForm($player);
-			}));
-	}
+    public function sendSpectateArenasForm(Player $player)
+    {
+        $player->sendForm(new MenuForm("§l§b» §9Kings§fUHC §b«", "§7Select an arena to spectate: ",
+            $this->getArenasButtons(), function (Player $player, Button $selected): void {
+                /** @var Arena $arena */
+                $arena = $this->getArenaManager()->getArena(explode("\n", $selected->getText())[0]);
+                $arena->spectateToArena($player);
+            }));
+    }
 
-	public function sendArenasForm(Player $player)
-	{
-		$player->sendForm(new MenuForm("§0uhc", "§7Available arenas for uhc run: ",
-			$this->getArenasButtons(), function (Player $player, Button $selected): void {
-				/** @var Arena $arena */
-				$arena = $this->plugin->arenas[explode("\n", $selected->getText())[0]];
-				$arena->joinToArena($player);
-			}));
-	}
+    public function sendAvailableArenaNotFound(Player $player)
+    {
+        $form = new MenuForm("§l§b» §9Kings§fUHC §b«", "§fThe are not available uhc arenas, would you like spectate a game?",
+            [
+                new Button("§aSee games", new Image("https://vignette.wikia.nocookie.net/hypixelserver/images/c/c0/UHC.png", Image::TYPE_URL)),
+                new Button("§cExit", new Image("https://img.pngio.com/x-icon-png-383653-free-icons-library-red-xpng-462_594.jpg", Image::TYPE_URL))
+            ], function (Player $player, Button $selected): void {
+                if ($selected->getValue() === 0) {
+                    $this->sendSpectateArenasForm($player);
+                }
+            });
+        $player->sendForm($form);
+    }
 
-	public function getArenasButtons()
-	{
-		$buttons = [];
-		foreach ($this->plugin->arenas as $name => $arena) {
-			/** @var Arena $arena */
-			$buttons[] = new Button($name . "\n§aPlaying: " . count($arena->players));
-		}
-		return $buttons;
-	}
+    public function getArenasButtons()
+    {
+        $buttons = [];
+        foreach ($this->getArenaManager()->getArenas() as $name => $arena) {
+            $buttons[] = new Button($name . "\n§aPlaying: " . count($arena->players), new Image("https://mcgamer.net/img/logo/uhc.png", Image::TYPE_URL));
+        }
+        return $buttons;
+    }
+
+    /**
+     * @return ArenaManager
+     */
+    private function getArenaManager(): ArenaManager
+    {
+        return $this->plugin->getArenaManager();
+    }
 }

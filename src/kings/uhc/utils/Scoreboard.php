@@ -128,4 +128,10 @@ class Scoreboard
     {
         return $this->owner;
     }
+
+    public function __destruct()
+    {
+        $this->despawn();
+        unset($this->owner);
+    }
 }

@@ -19,22 +19,20 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bff09cc0-786d-4dec-baa1-553ae04465e3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="bff09cc0-786d-4dec-baa1-553ae04465e3" name="Default Changelist" comment="commit">
+      <change afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Game.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/plugin.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/resources/config.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/MapReset.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/utils/MapReset.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/CpsCounter.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/CpsCounter.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/FormManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/FormManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/BossBar.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/BossBar.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/Scoreboard.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/Scoreboard.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +120,11 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\PocketMine-MP\plugins\KingsUHC\src\kings\uhc\arena\utils" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -135,8 +138,17 @@
       <workItem from="1603156904177" duration="6029000" />
       <workItem from="1603299932313" duration="182000" />
       <workItem from="1603301462318" duration="2670000" />
-      <workItem from="1603304515881" duration="2385000" />
+      <workItem from="1603304515881" duration="2669000" />
+      <workItem from="1603321834620" duration="11463000" />
     </task>
+    <task id="LOCAL-00001" summary="commit">
+      <created>1603307992864</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1603307992864</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -154,23 +166,27 @@
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="440" y="159" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1603136507197">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="440" y="159" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.738@0.0.1366.738" timestamp="1603136507197" />
-    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser" timestamp="1603302292563">
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser" timestamp="1603332473343">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser/0.0.1366.738@0.0.1366.738" timestamp="1603302292563" />
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser/0.0.1366.738@0.0.1366.738" timestamp="1603332473343" />
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1603131109215">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1366.738@0.0.1366.738" timestamp="1603131109215" />
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603306588008">
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603323542787">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603306588008" />
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603323542787" />
     <state x="463" y="124" key="FileChooserDialogImpl" timestamp="1603131042462">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
@@ -183,17 +199,21 @@
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="499" y="0" key="Github.UntrackedFilesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603155771649" />
-    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603302280339">
+    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603323351033">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603302280339" />
+    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603323351033" />
     <state x="184" y="14" key="SettingsEditor" timestamp="1603157166114">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="184" y="14" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1603157166114" />
-    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603157606828">
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2" timestamp="1603307995674">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603157606828" />
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1603307995674" />
+    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603323307474">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603323307474" />
   </component>
 </project>

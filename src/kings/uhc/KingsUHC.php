@@ -25,6 +25,7 @@ use kings\uhc\commands\MainCommand;
 use kings\uhc\entities\Leaderboard;
 use kings\uhc\forms\FormManager;
 use kings\uhc\provider\YamlDataProvider;
+use kings\uhc\task\JoinGameQueue;
 use kings\uhc\utils\BossBar;
 use kings\uhc\utils\CpsCounter;
 use pocketmine\entity\Entity;
@@ -46,6 +47,8 @@ class KingsUHC extends PluginBase implements Listener
     private $arenaManager;
     /** @var CpsCounter */
     private $cpsCounter;
+    /** @var JoinGameQueue */
+    private $joinGameQueue;
 
 
     public function onEnable()
@@ -54,15 +57,11 @@ class KingsUHC extends PluginBase implements Listener
 		Entity::registerEntity(Leaderboard::class, true, ['Leaderboard']);
 		$this->getServer()->getCommandMap()->register('uhc', new MainCommand($this));
 		$this->getServer()->getPluginManager()->registerEvents(new UHCListener($this), $this);
+        $this->getScheduler()->scheduleRepeatingTask($this->joinGameQueue = new JoinGameQueue($this), 20);
 		$this->formManager = new FormManager($this);
 		$this->dataProvider = new YamlDataProvider($this);
 		$this->arenaManager = new ArenaManager($this);
         $this->cpsCounter = new CpsCounter($this);
-	}
-
-	public function onLoad()
-	{
-		$this->bossbar = new BossBar();
 	}
 
 	public function onDisable()
@@ -100,5 +99,13 @@ class KingsUHC extends PluginBase implements Listener
     public function getCpsCounter(): CpsCounter
     {
         return $this->cpsCounter;
+    }
+
+    /**
+     * @return JoinGameQueue
+     */
+    public function getJoinGameQueue(): JoinGameQueue
+    {
+        return $this->joinGameQueue;
     }
 }

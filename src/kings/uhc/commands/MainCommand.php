@@ -83,8 +83,11 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                         break;
                     case 'join':
                         /** @var Arena $arena */
-                        $arena = $this->getArenaManager()->getArenas()[$args[1]];
-                        $arena->joinToArena($sender);
+                        $arena = $this->getArenaManager()->getAvailableArena();
+                        if ($arena !== null) {
+                            $arena->joinToArena($sender);
+                        }
+
                         break;
                     case 'tops':
                         if ($sender->isOp()) {
@@ -97,8 +100,8 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                             $nbt->setTag(clone $sender->namedtag->getCompoundTag('Skin'));
                             $npc = new Leaderboard($sender->getLevel(), $nbt);
                             $npc->spawnToAll();
+                            $sender->sendMessage("§8[§9Kings§fUHC§8] §7Leaderboard has been placed.");
                         }
-                        $sender->sendMessage("§8[§9Kings§fUHC§8] §7Leaderboard has been placed.");
                         break;
                     case "set":
                         if (!$sender->hasPermission("uhc.cmd.set")) {

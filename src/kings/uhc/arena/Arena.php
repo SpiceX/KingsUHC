@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace kings\uhc\arena;
 
-use Exception;
+use kings\uhc\arena\utils\MapReset;
 use kings\uhc\KingsUHC;
 use kings\uhc\math\Vector3;
 use kings\uhc\utils\BossBar;
@@ -30,6 +30,7 @@ use pocketmine\block\Block;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -44,7 +45,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
 
 
-class Arena implements Listener
+class Arena extends Game implements Listener
 {
 
     const MSG_MESSAGE = 0;
@@ -82,18 +83,20 @@ class Arena implements Listener
     public $setup = false;
     /** @var Player[] $players */
     public $players = [];
+    /** @var Player[] $spectators */
+    public $spectators = [];
     /** @var Player[] $toRespawn */
     public $toRespawn = [];
     /** @var Level $level */
     public $level = null;
-    /** @var BossBar */
-    public $bossbar;
     /** @var array */
     private $scenarios = [];
     /** @var array */
     private $scenarioVotes = [];
     /** @var Scoreboard[] */
-    private $scoreboards = [];
+    protected $scoreboards = [];
+    /** @var BossBar[] */
+    protected $bossbars;
 
     /**
      * Arena constructor.
@@ -106,7 +109,6 @@ class Arena implements Listener
         $this->data = $arenaFileData;
         $this->setup = !$this->enable(false);
         $this->plugin->getScheduler()->scheduleRepeatingTask($this->scheduler = new ArenaScheduler($this), 20);
-        $this->bossbar = new BossBar("§a...", 1, 1);
         if ($this->setup) {
             if (empty($this->data)) {
                 $this->createBasicData();
@@ -179,19 +181,6 @@ class Arena implements Listener
     }
 
     /**
-     * Create the basic data for an arena
-     */
-    private function createBasicData()
-    {
-        $this->data = [
-            "level" => null,
-            "slots" => 30,
-            "center" => null,
-            "enabled" => false,
-        ];
-    }
-
-    /**
      * @param Player $player
      */
     public function joinToArena(Player $player)
@@ -216,19 +205,10 @@ class Arena implements Listener
             return;
         }
 
-        $selected = false;
-        for ($lS = 1; $lS <= $this->data["slots"]; $lS++) {
-            if (!$selected) {
-                if (!isset($this->players[$index = "spawn-{$lS}"])) {
-                    $this->players[$index] = $player;
-                    $selected = true;
-                }
-            }
-        }
+        $this->players[$player->getName()] = $player;
         $player->teleport(Position::fromObject(Vector3::fromString($this->data["center"]), $this->level)->add(0, 90, 0));
-        //$player->teleport($this->level->getSafeSpawn());
         $this->scoreboards[$player->getName()] = new Scoreboard($player);
-
+        $this->bossbars[$player->getName()] = new BossBar($player);
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
@@ -243,113 +223,23 @@ class Arena implements Listener
 
     /**
      * @param Player $player
-     * @return bool $isInGame
      */
-    public function inGame(Player $player): bool
+    public function spectateToArena(Player $player)
     {
-        switch ($this->phase) {
-            case self::PHASE_LOBBY:
-                $inGame = false;
-                foreach ($this->players as $players) {
-                    if ($players->getId() == $player->getId()) {
-                        $inGame = true;
-                    }
-                }
-                return $inGame;
-            default:
-                return isset($this->players[$player->getName()]);
-        }
-    }
-
-    /**
-     * @param string $message
-     * @param int $id
-     * @param string $subMessage
-     */
-    public function broadcastMessage(string $message, int $id = 0, string $subMessage = "")
-    {
-        foreach ($this->players as $player) {
-            switch ($id) {
-                case self::MSG_MESSAGE:
-                    $player->sendMessage($message);
-                    break;
-                case self::MSG_TIP:
-                    $player->sendTip($message);
-                    break;
-                case self::MSG_POPUP:
-                    $player->sendPopup($message);
-                    break;
-                case self::MSG_TITLE:
-                    $player->sendTitle($message, $subMessage);
-                    break;
-            }
-        }
-    }
-
-    /**
-     * @param array $lines
-     * @throws Exception
-     */
-    public function updateScoreboard(array $lines)
-    {
-        foreach ($this->scoreboards as $scoreboard) {
-            if (!$scoreboard->isSpawned()){
-                $scoreboard->spawn("§9§l");
-            }
-            $scoreboard->removeLines();
-            foreach ($lines as $index => $line) {
-                $scoreboard->setScoreLine($index, $line);
-            }
-        }
-    }
-
-    /**
-     * Starts the game
-     */
-    public function startGame()
-    {
-        $players = [];
-        foreach ($this->players as $player) {
-            $players[$player->getName()] = $player;
-            $player->setGamemode(Player::SURVIVAL);
-            $this->bossbar->showTo($player);
-            $player->getInventory()->addItem(Item::get(Item::GOLD_AXE));
-            $player->getInventory()->addItem(Item::get(Item::GOLD_PICKAXE));
-            $player->getInventory()->addItem(Item::get(Item::GOLD_SHOVEL));
-        }
-
-
-        $this->players = $players;
-        $this->phase = 1;
-        $this->pvpEnabled = false;
-        $this->broadcastMessage("§aGame Started!", self::MSG_TITLE);
-        $this->broadcastMessage("§6§l» §r§aPvP will be enabled in 6 minutes.", self::MSG_MESSAGE);
-    }
-
-    /**
-     * @param bool $winner
-     */
-    public function startRestart(bool $winner = true)
-    {
-        $player = null;
-        foreach ($this->players as $p) {
-            $player = $p;
-        }
-
-        if ($player === null || (!$player instanceof Player) || (!$player->isOnline())) {
-            $this->phase = self::PHASE_RESTART;
+        if ($this->inSpectate($player)) {
+            $player->sendMessage("§c§l» §7You are already spectating a game!");
             return;
         }
-        if ($winner) {
-            $player->sendTitle("§aYOU WON!");
-            $this->plugin->getServer()->broadcastMessage("§6uhc » §7Player §6{$player->getName()}§7 won the game at {$this->level->getFolderName()}!");
-        } else {
-            foreach ($this->players as $player) {
-                $player->sendTitle("§cGAME OVER!");
-            }
-            $this->plugin->getServer()->broadcastMessage("§6§l» §r§7No winners at {$this->level->getFolderName()}!");
-        }
-        $this->phase = self::PHASE_RESTART;
+        $this->spectators[$player->getName()] = $player;
+        $player->teleport(Position::fromObject(Vector3::fromString($this->data["center"]), $this->level)->add(0, 90, 0));
+        $this->scoreboards[$player->getName()] = new Scoreboard($player);
+        $player->getInventory()->clearAll();
+        $player->getArmorInventory()->clearAll();
+        $player->getCursorInventory()->clearAll();
+        $player->getInventory()->setItem(5, Item::get(Item::COMPASS)->setCustomName('§9Players'));
+        $player->setGamemode(Player::SPECTATOR);
+        $player->setHealth(20);
+        $player->setFood(20);
     }
 
     /**
@@ -363,13 +253,6 @@ class Arena implements Listener
         $this->minZ = $this->minZ - $blocks;
     }
 
-    /**
-     * @return bool $end
-     */
-    public function checkEnd(): bool
-    {
-        return count($this->players) <= 1;
-    }
 
     /**
      * @param PlayerExhaustEvent $event
@@ -399,49 +282,6 @@ class Arena implements Listener
         $this->disconnectPlayer($player, "", true);
         $this->broadcastMessage("§6§l» §r§7{$this->plugin->getServer()->getLanguage()->translate($event->getDeathMessage())} §7(" . count($this->players) . "/{$this->data["slots"]})");
         $event->setDeathMessage("");
-    }
-
-    /**
-     * @param Player $player
-     * @param string $quitMsg
-     * @param bool $death
-     */
-    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = false)
-    {
-        switch ($this->phase) {
-            case Arena::PHASE_LOBBY:
-                $index = "";
-                foreach ($this->players as $i => $p) {
-                    if ($p->getId() == $player->getId()) {
-                        $index = $i;
-                    }
-                }
-                if ($index != "") {
-                    unset($this->players[$index]);
-                }
-                break;
-            default:
-                unset($this->players[$player->getName()]);
-                break;
-        }
-        $player->removeAllEffects();
-        $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
-        $player->setHealth(20);
-        $this->scoreboards[$player->getName()]->despawn();
-        unset($this->scoreboards[$player->getName()]);
-        $this->bossbar->hideFrom($player);
-        $player->setFood(20);
-        $player->getInventory()->clearAll();
-        $player->getArmorInventory()->clearAll();
-        $player->getCursorInventory()->clearAll();
-        $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-        if (!$death) {
-            $this->broadcastMessage("§6§l» §r§7 Player {$player->getName()} left the game. §7[" . count($this->players) . "/{$this->data["slots"]}]");
-        }
-
-        if ($quitMsg != "") {
-            $player->sendMessage("§6§l» §r§7$quitMsg");
-        }
     }
 
     /**
@@ -477,7 +317,7 @@ class Arena implements Listener
                     }
                     $this->toRespawn[$victim->getName()] = $victim;
                     $this->disconnectPlayer($victim, "", true);
-                    $this->broadcastMessage("§6uhc » §7{$victim->getName()} has dead §7[" . count($this->players) . "/{$this->data["slots"]}]");
+                    $this->broadcastMessage("§6§l» §r§7{$victim->getName()} has dead §7(" . count($this->players) . "/{$this->data["slots"]})");
                 }
             }
         }
@@ -519,16 +359,16 @@ class Arena implements Listener
                 switch ($args[0]) {
                     case 'uhc':
                         if ($args[1] === 'exit') {
-                            $this->disconnectPlayer($event->getPlayer(), "§aYou have successfully left the game!");
+                            $this->disconnectPlayer($event->getPlayer(), "§a§l» §r§7You have successfully left the game!");
                         } else {
-                            $event->getPlayer()->sendMessage("§cUse /uhr exit to leave the game.");
+                            $event->getPlayer()->sendMessage("§c§l» §r§7Use /uhc exit to leave the game.");
                         }
                         break;
                     case 'spawn':
                     case 'lobby':
                     case 'hub':
                     default:
-                        $event->getPlayer()->sendMessage("§cUse /uhc exit to leave the game.");
+                        $event->getPlayer()->sendMessage("§c§l» §r§7Use /uhc exit to leave the game.");
                         break;
                 }
             }
@@ -658,13 +498,17 @@ class Arena implements Listener
                 }
                 break;
         }
-
     }
 
-
-    public function __destruct()
+    /**
+     * @param EntityRegainHealthEvent $event
+     */
+    public function onEntityRegainHealth(EntityRegainHealthEvent $event)
     {
-        unset($this->scheduler);
+        $player = $event->getEntity();
+        if ($player instanceof Player && $this->inGame($player)) {
+            $event->setCancelled();
+        }
     }
 
     /**
@@ -673,5 +517,10 @@ class Arena implements Listener
     public function getScenarios(): array
     {
         return $this->scenarios;
+    }
+
+    public function __destruct()
+    {
+        unset($this->scheduler);
     }
 }

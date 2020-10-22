@@ -17,8 +17,9 @@
  */
 
 declare(strict_types=1);
-namespace kings\uhc\arena;
+namespace kings\uhc\arena\utils;
 
+use kings\uhc\arena\Arena;
 use pocketmine\level\Level;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -27,7 +28,7 @@ use ZipArchive;
 
 /**
  * Class MapReset
- * @package skywars\arena
+ * @package kings\uhc\utils\arena
  */
 class MapReset
 {

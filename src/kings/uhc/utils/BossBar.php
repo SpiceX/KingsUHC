@@ -23,10 +23,10 @@ class BossBar extends Vector3
     protected $entityId;
     /** @var array */
     protected $metadata = [];
-    /** @var array */
-    protected $viewers = [];
+    /** @var Player */
+    private $player;
 
-    public function __construct(string $title = '', float $hp = 1, float $maxHp = 1)
+    public function __construct(Player $player)
     {
         parent::__construct(0, 255);
 
@@ -36,30 +36,21 @@ class BossBar extends Vector3
         );
         $this->metadata = [
             Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
-            Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $title]
+            Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, '']
         ];
 
         $this->entityId = Entity::$entityCount++;
 
-        $this->setHealthPercent($hp, $maxHp);
+        $this->setHealthPercent(1, 1);
+        $this->player = $player;
     }
 
-    public function setTitle(string $t, bool $update = true): void
+    public function setTitle(string $title): void
     {
-        $this->setMetadata(Entity::DATA_NAMETAG, Entity::DATA_TYPE_STRING, $t);
-        if ($update) {
-            $this->updateForAll();
-        }
+        $this->setMetadata(Entity::DATA_NAMETAG, Entity::DATA_TYPE_STRING, $title);
     }
 
-    public function updateForAll(): void
-    {
-        foreach ($this->viewers as $player) {
-            $this->updateFor($player);
-        }
-    }
-
-    public function updateFor(Player $player, $title = '', $hp = 100): void
+    public function update($title = '', $hp = 100): void
     {
         $pk = new BossEventPacket();
         $pk->bossEid = $this->entityId;
@@ -68,13 +59,13 @@ class BossBar extends Vector3
         $pk->title = $title;
         $pk2 = clone $pk;
         $pk2->eventType = BossEventPacket::TYPE_HEALTH_PERCENT;
-        $player->dataPacket($pk);
-        $player->dataPacket($pk2);
-        $player->dataPacket($this->getHealthPacket());
+        $this->player->dataPacket($pk);
+        $this->player->dataPacket($pk2);
+        $this->player->dataPacket($this->getHealthPacket());
         $mpk = new SetActorDataPacket();
         $mpk->entityRuntimeId = $this->entityId;
         $mpk->metadata = $this->metadata;
-        $player->dataPacket($mpk);
+        $this->player->dataPacket($mpk);
     }
 
     public function getHealthPercent(): float
@@ -82,7 +73,7 @@ class BossBar extends Vector3
         return $this->healthPercent;
     }
 
-    public function setHealthPercent(?float $hp = null, ?float $maxHp = null, bool $update = true): void
+    public function setHealthPercent(?float $hp = 1.0, ?float $maxHp = 1.0): void
     {
         if ($maxHp !== null) {
             $this->maxHealthPercent = $maxHp;
@@ -96,9 +87,14 @@ class BossBar extends Vector3
             $this->healthPercent = $hp;
         }
 
-        if ($update) {
-            $this->updateForAll();
-        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSpawned(): bool
+    {
+        return $this->player !== null;
     }
 
     public function getTitle(): string
@@ -139,7 +135,7 @@ class BossBar extends Vector3
         return $this->maxHealthPercent;
     }
 
-    public function showTo(Player $player, bool $isViewer = true): void
+    public function spawn(): void
     {
         $pk = new AddActorPacket();
         $pk->entityRuntimeId = $this->entityId;
@@ -147,8 +143,8 @@ class BossBar extends Vector3
         $pk->metadata = $this->metadata;
         $pk->position = $this;
 
-        $player->dataPacket($pk);
-        $player->dataPacket($this->getHealthPacket());
+        $this->player->dataPacket($pk);
+        $this->player->dataPacket($this->getHealthPacket());
 
         $pk2 = new BossEventPacket();
         $pk2->bossEid = $this->entityId;
@@ -159,33 +155,28 @@ class BossBar extends Vector3
         $pk2->overlay = 0;
         $pk2->unknownShort = 0;
 
-        $player->dataPacket($pk2);
-
-        if ($isViewer) {
-            $this->viewers[$player->getLoaderId()] = $player;
-        }
+        $this->player->dataPacket($pk2);
     }
 
-    public function hideFrom(Player $player): void
+    public function despawn(): void
     {
         $pk = new BossEventPacket();
         $pk->bossEid = $this->entityId;
         $pk->eventType = BossEventPacket::TYPE_HIDE;
 
-        $player->dataPacket($pk);
+        $this->player->dataPacket($pk);
 
         $pk2 = new RemoveActorPacket();
         $pk2->entityUniqueId = $this->entityId;
-
-        $player->dataPacket($pk2);
-
-        if (isset($this->viewers[$player->getLoaderId()])) {
-            unset($this->viewers[$player->getLoaderId()]);
-        }
+        $this->player->dataPacket($pk2);
     }
 
-    public function getViewers(): array
+    /**
+     * @return Player
+     */
+    public function getPlayer(): Player
     {
-        return $this->viewers;
+        return $this->player;
     }
+
 }
