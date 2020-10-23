@@ -23,6 +23,7 @@ namespace kings\uhc\forms;
 
 use kings\uhc\arena\Arena;
 use kings\uhc\arena\ArenaManager;
+use kings\uhc\arena\scenario\Scenarios;
 use kings\uhc\forms\elements\Button;
 use kings\uhc\forms\elements\Image;
 use kings\uhc\forms\types\MenuForm;
@@ -66,11 +67,53 @@ class FormManager
         $player->sendForm($form);
     }
 
+    /**
+     * @param Player $player
+     */
+    public function sendVoteForm(Player $player)
+    {
+        $player->sendForm(new MenuForm("§l§b» §9Kings§fUHC §b«", "§7Select your favorite scenario:",
+            $this->getScenarioButtons(), function (Player $player, Button $selected): void {
+                $arena = $this->plugin->getJoinGameQueue()->getArenaByPlayer($player);
+                if ($arena !== null) {
+                    if ($arena->voteManager->hasVoted($player)) {
+                        $player->sendMessage("§l§c» §r§7You have already voted.");
+                        return;
+                    }
+                    $arena->voteManager->addVote($player, $selected->getText());
+                    $player->sendMessage("§l§a» §r§7You have voted for " . $selected->getText());
+                }
+            }));
+    }
+
+    /**
+     * @param Player $player
+     * @param array $players
+     */
+    public function sendSpectatePlayer(Player $player, array $players){
+        $form = new MenuForm("§l§9Kings§fUHC", "§7Select a player:", $players,
+        function (Player $player, Button $selected) use ($players): void {
+            /** @var Player[] $players */
+            $player->teleport($players[$selected->getText()]->asPosition());
+            $player->sendMessage("§l§a» §r§7Now Spectating " . $players[$selected->getText()]->getName());
+        });
+        $player->sendForm($form);
+    }
+
     public function getArenasButtons()
     {
         $buttons = [];
         foreach ($this->getArenaManager()->getArenas() as $name => $arena) {
             $buttons[] = new Button($name . "\n§aPlaying: " . count($arena->players), new Image("https://mcgamer.net/img/logo/uhc.png", Image::TYPE_URL));
+        }
+        return $buttons;
+    }
+
+    public function getScenarioButtons()
+    {
+        $buttons = [];
+        foreach (Scenarios::getScenarios() as $scenario) {
+            $buttons[] = new Button($scenario);
         }
         return $buttons;
     }

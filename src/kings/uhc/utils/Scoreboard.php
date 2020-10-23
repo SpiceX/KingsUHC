@@ -78,7 +78,7 @@ class Scoreboard
         $entry = new ScorePacketEntry();
         $entry->objectiveName = $this->owner->getName();
         $entry->type = $entry::TYPE_FAKE_PLAYER;
-        $entry->customName = $message . str_repeat(" ", $line);
+        $entry->customName = $message; //. str_repeat(" ", $line);
         $entry->score = $line;
         $entry->scoreboardId = $line;
         if (isset($this->lines[$line])) {

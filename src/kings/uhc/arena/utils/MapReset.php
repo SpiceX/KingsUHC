@@ -107,7 +107,6 @@ class MapReset
 		if ($justSave) {
 			return null;
 		}
-
 		$this->plugin->plugin->getServer()->loadLevel($folderName);
 		return $this->plugin->plugin->getServer()->getLevelByName($folderName);
 	}

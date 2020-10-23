@@ -9,6 +9,7 @@ use kings\uhc\math\Vector3;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\level\Level;
+use pocketmine\Player;
 use pocketmine\utils\Config;
 
 class ArenaManager implements Listener
@@ -51,6 +52,7 @@ class ArenaManager implements Listener
                     $player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
                 }
                 // must be reseted
+
                 $arena->mapReset->loadMap($arena->level->getFolderName(), true);
             }
             $config = new Config($this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
@@ -66,6 +68,22 @@ class ArenaManager implements Listener
     public function getArena(string $identifier): ?Arena
     {
         return $this->arenas[$identifier] ?? null;
+    }
+
+    /**
+     * @param Player $player
+     * @return Arena|null
+     */
+    public function getArenaByPlayer(Player $player): ?Arena
+    {
+        foreach ($this->arenas as $arena) {
+            foreach ($arena->players as $players) {
+                if ($player->getId() === $players->getId()){
+                    return $arena;
+                }
+            }
+        }
+        return null;
     }
 
     /**

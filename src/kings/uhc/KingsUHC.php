@@ -108,4 +108,20 @@ class KingsUHC extends PluginBase implements Listener
     {
         return $this->joinGameQueue;
     }
+
+    /**
+     * @return FormManager
+     */
+    public function getFormManager(): FormManager
+    {
+        return $this->formManager;
+    }
+
+    /**
+     * @return YamlDataProvider
+     */
+    public function getDataProvider(): YamlDataProvider
+    {
+        return $this->dataProvider;
+    }
 }

@@ -20,13 +20,16 @@ declare(strict_types=1);
 
 namespace kings\uhc\arena;
 
+use kings\uhc\arena\utils\KillsManager;
 use kings\uhc\arena\utils\MapReset;
+use kings\uhc\arena\utils\VoteManager;
 use kings\uhc\KingsUHC;
-use kings\uhc\math\Vector3;
 use kings\uhc\utils\BossBar;
 use kings\uhc\utils\PluginUtils;
 use kings\uhc\utils\Scoreboard;
 use pocketmine\block\Block;
+use pocketmine\entity\Effect;
+use pocketmine\entity\EffectInstance;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -35,11 +38,13 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
+use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
-use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
+use pocketmine\level\Location;
+use pocketmine\level\particle\RedstoneParticle;
 use pocketmine\level\Position;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
@@ -60,7 +65,7 @@ class Arena extends Game implements Listener
     /** @var KingsUHC $plugin */
     public $plugin;
     /** @var int $maxX */
-    public $maxX = 100;
+    public $maxX = 1000;
     /** @var int $minX */
     public $minX = -1000;
     /** @var int $maxZ */
@@ -72,11 +77,9 @@ class Arena extends Game implements Listener
     /** @var MapReset $mapReset */
     public $mapReset;
     /** @var int $phase */
-    public $phase = 0;
+    public $phase = self::PHASE_LOBBY;
     /** @var bool $pvpEnabled */
     public $pvpEnabled = false;
-    /** @var bool $deathmatch */
-    public $deathmatch = false;
     /** @var array $data */
     public $data = [];
     /** @var bool $setting */
@@ -85,18 +88,20 @@ class Arena extends Game implements Listener
     public $players = [];
     /** @var Player[] $spectators */
     public $spectators = [];
-    /** @var Player[] $toRespawn */
-    public $toRespawn = [];
     /** @var Level $level */
     public $level = null;
     /** @var array */
-    private $scenarios = [];
-    /** @var array */
-    private $scenarioVotes = [];
+    public $scenarios = [];
     /** @var Scoreboard[] */
     protected $scoreboards = [];
     /** @var BossBar[] */
     protected $bossbars;
+    /** @var KillsManager */
+    public $killsManager;
+    /** @var VoteManager */
+    public $voteManager;
+    /** @var array */
+    private $previousBlocks;
 
     /**
      * Arena constructor.
@@ -109,6 +114,8 @@ class Arena extends Game implements Listener
         $this->data = $arenaFileData;
         $this->setup = !$this->enable(false);
         $this->plugin->getScheduler()->scheduleRepeatingTask($this->scheduler = new ArenaScheduler($this), 20);
+        $this->killsManager = new KillsManager($this);
+        $this->voteManager = new VoteManager($this);
         if ($this->setup) {
             if (empty($this->data)) {
                 $this->createBasicData();
@@ -116,6 +123,7 @@ class Arena extends Game implements Listener
         } else {
             $this->loadArena();
         }
+        parent::__construct($plugin, $arenaFileData);
     }
 
     /**
@@ -177,7 +185,6 @@ class Arena extends Game implements Listener
         $this->phase = static::PHASE_LOBBY;
         $this->players = [];
         $this->scoreboards = [];
-        $this->scenarioVotes = [];
     }
 
     /**
@@ -206,14 +213,13 @@ class Arena extends Game implements Listener
         }
 
         $this->players[$player->getName()] = $player;
-        $player->teleport(Position::fromObject(Vector3::fromString($this->data["center"]), $this->level)->add(0, 90, 0));
         $this->scoreboards[$player->getName()] = new Scoreboard($player);
         $this->bossbars[$player->getName()] = new BossBar($player);
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
         $player->getArmorInventory()->setChestplate(Item::get(Item::ELYTRA));
-        $player->setMotion($player->getDirectionVector()->multiply(0.5)->add(0, 3, 0));
+        $player->knockBack($player, 0.0, $player->getDirectionVector()->getX(), $player->getDirectionVector()->getZ(), 0.5);
         $player->setGamemode(Player::SURVIVAL);
         $player->setHealth(20);
         $player->setFood(20);
@@ -223,20 +229,25 @@ class Arena extends Game implements Listener
 
     /**
      * @param Player $player
+     * @param bool $death
      */
-    public function spectateToArena(Player $player)
+    public function spectateToArena(Player $player, bool $death = false)
     {
         if ($this->inSpectate($player)) {
             $player->sendMessage("§c§l» §7You are already spectating a game!");
             return;
         }
+        if ($death) {
+            $player->addEffect(new EffectInstance(Effect::getEffect(Effect::BLINDNESS), 20));
+            $player->sendTitle("§cGame Over", "§7Good luck next time");
+        }
         $this->spectators[$player->getName()] = $player;
-        $player->teleport(Position::fromObject(Vector3::fromString($this->data["center"]), $this->level)->add(0, 90, 0));
+        $player->teleport($this->players[array_rand($this->players)]->asPosition());
         $this->scoreboards[$player->getName()] = new Scoreboard($player);
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
-        $player->getInventory()->setItem(5, Item::get(Item::COMPASS)->setCustomName('§9Players'));
+        $player->getInventory()->setItem(4, Item::get(Item::COMPASS)->setCustomName('§9Players'));
         $player->setGamemode(Player::SPECTATOR);
         $player->setHealth(20);
         $player->setFood(20);
@@ -247,12 +258,105 @@ class Arena extends Game implements Listener
      */
     public function shrinkEdge(int $blocks)
     {
-        $this->maxX = $this->maxX - $blocks;
-        $this->minX = $this->minX - $blocks;
-        $this->maxZ = $this->maxZ - $blocks;
-        $this->minZ = $this->minZ - $blocks;
+        $this->maxX -= $blocks;
+        $this->minX += $blocks;
+        $this->maxZ -= $blocks;
+        $this->minZ += $blocks;
     }
 
+    public function checkPlayersInsideBorder()
+    {
+        foreach ($this->players as $player) {
+            $aabb = new AxisAlignedBB($this->minX, 0, $this->minZ, $this->maxX, $this->level->getWorldHeight(), $this->maxZ);
+            if (!$aabb->isVectorInXZ($player->getLocation())) {
+                for ($i = 0; $i < 20; ++$i) {
+                    $vector = PluginUtils::getRandomVector()->multiply(3);
+                    $vector->y = abs($vector->getY());
+                    $player->getLevel()->addParticle(new RedstoneParticle($player->getLocation()->add($vector->x, $vector->y, $vector->z)));
+                    $player->getLocation()->add($vector->x, $vector->y, $vector->z);
+                }
+                $player->addEffect(new EffectInstance(Effect::getEffect(Effect::INSTANT_DAMAGE), 1, 0, false));
+            }
+        }
+    }
+
+    /**
+     * @param Position $pos
+     * @return bool
+     */
+    public function insideEdge(Position $pos): bool
+    {
+        if (
+            $pos->getX() >= $this->minX && $pos->getX() <= $this->maxX &&
+            $pos->getZ() >= $this->minZ && $pos->getZ() <= $this->maxZ &&
+            $this->level->getFolderName() == $pos->getLevel()->getFolderName()
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param Position $pos
+     * @return bool
+     */
+    public function isPvpSurrounding(Position $pos): bool
+    {
+        for ($i = 0; $i <= 5; $i++) {
+            if ($this->insideEdge($pos->getSide($i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param Player $player
+     * @return array
+     */
+    private function getWallBlocks(Player $player): array
+    {
+        $locations = [];
+        $radius = 4;
+        $l = $player->getPosition();
+        $loc1 = clone $l->add($radius, 0, $radius);
+        $loc2 = clone $l->subtract($radius, 0, $radius);
+        $maxBlockX = max($loc1->getFloorX(), $loc2->getFloorX());
+        $minBlockX = min($loc1->getFloorX(), $loc2->getFloorX());
+        $maxBlockZ = max($loc1->getFloorZ(), $loc2->getFloorZ());
+        $minBlockZ = min($loc1->getFloorZ(), $loc2->getFloorZ());
+
+        for ($x = $minBlockX; $x <= $maxBlockX; $x++) {
+            for ($z = $minBlockZ; $z <= $maxBlockZ; $z++) {
+                $location = new Position($x, $l->getFloorY(), $z, $l->getLevel());
+                if ($this->insideEdge($location)) {
+                    continue;
+                }
+                if (!$this->isPvpSurrounding($location)) {
+                    continue;
+                }
+                for ($i = 0; $i <= $radius; $i++) {
+                    $loc = clone $location;
+                    $loc->setComponents($loc->getX(), $loc->getY() + $i, $loc->getZ());
+                    if ($loc->getLevel()->getBlock($loc)->getId() !== Item::AIR) {
+                        continue;
+                    }
+                    $locations[$loc->__toString()] = $loc;
+                }
+            }
+        }
+        return $locations;
+    }
+
+    public function onDamageEntity(EntityDamageEvent $event)
+    {
+        $entity = $event->getEntity();
+        if ($entity instanceof Player && $this->inGame($entity)) {
+            if ($entity->getArmorInventory()->getChestplate()->getId() === Item::ELYTRA) {
+                $event->setCancelled();
+            }
+        }
+    }
 
     /**
      * @param PlayerExhaustEvent $event
@@ -268,6 +372,20 @@ class Arena extends Game implements Listener
         }
     }
 
+    public function onInteractPlayer(PlayerInteractEvent $event)
+    {
+        $player = $event->getPlayer();
+        if ($this->inSpectate($player)) {
+            switch ($event->getItem()->getId()) {
+                case Item::COMPASS:
+                    if ($event->getItem()->getCustomName() === '§9Players') {
+                        $this->plugin->getFormManager()->sendSpectatePlayer($player, $this->players);
+                    }
+                    break;
+            }
+        }
+    }
+
     /**
      * @param PlayerDeathEvent $event
      */
@@ -275,11 +393,12 @@ class Arena extends Game implements Listener
     {
         $player = $event->getPlayer();
 
-        if (!$this->inGame($player)) return;
+        if (!$this->inGame($player)) {
+            return;
+        }
 
         $event->setDrops([]);
-        $this->toRespawn[$player->getName()] = $player;
-        $this->disconnectPlayer($player, "", true);
+        $this->spectateToArena($player);
         $this->broadcastMessage("§6§l» §r§7{$this->plugin->getServer()->getLanguage()->translate($event->getDeathMessage())} §7(" . count($this->players) . "/{$this->data["slots"]})");
         $event->setDeathMessage("");
     }
@@ -299,12 +418,15 @@ class Arena extends Game implements Listener
                 $event->setCancelled(true);
         }
         if ($event instanceof EntityDamageByEntityEvent) {
+            $damager = $event->getDamager();
+            $victim = $event->getEntity();
             if (!$this->pvpEnabled) {
+                if ($damager instanceof Player) {
+                    $damager->sendMessage("§c§l»§r §7PvP is disabled!");
+                }
                 $event->setCancelled(true);
                 return;
             }
-            $damager = $event->getDamager();
-            $victim = $event->getEntity();
             if ($event->getFinalDamage() > $victim->getHealth()) {
                 if ($damager instanceof Player && $victim instanceof Player) {
                     $event->setCancelled(true);
@@ -315,23 +437,11 @@ class Arena extends Game implements Listener
                             $damager->getLevel()->dropItem($damager->asVector3(), $item);
                         }
                     }
-                    $this->toRespawn[$victim->getName()] = $victim;
-                    $this->disconnectPlayer($victim, "", true);
-                    $this->broadcastMessage("§6§l» §r§7{$victim->getName()} has dead §7(" . count($this->players) . "/{$this->data["slots"]})");
+                    $this->killsManager->addKill($damager);
+                    $this->spectateToArena($victim, true);
+                    $this->broadcastMessage("§6§l» §r§7{$victim->getName()} has been killed by {$damager->getName()} §7(" . count($this->players) . "/{$this->data["slots"]})");
                 }
             }
-        }
-    }
-
-    /**
-     * @param PlayerRespawnEvent $event
-     */
-    public function onRespawn(PlayerRespawnEvent $event)
-    {
-        $player = $event->getPlayer();
-        if (isset($this->toRespawn[$player->getName()])) {
-            $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-            unset($this->toRespawn[$player->getName()]);
         }
     }
 
@@ -353,15 +463,23 @@ class Arena extends Game implements Listener
         if ($this->inGame($event->getPlayer())) {
             $message = $event->getMessage();
             if ($message{0} === "/") {
-                $event->setCancelled(true);
                 $command = substr($message, 1);
                 $args = explode(" ", $command);
                 switch ($args[0]) {
                     case 'uhc':
-                        if ($args[1] === 'exit') {
-                            $this->disconnectPlayer($event->getPlayer(), "§a§l» §r§7You have successfully left the game!");
-                        } else {
-                            $event->getPlayer()->sendMessage("§c§l» §r§7Use /uhc exit to leave the game.");
+                        switch ($args[1]) {
+                            case 'leave':
+                                $this->disconnectPlayer($event->getPlayer(), "§a§l» §r§7You have successfully left the game!");
+                                break;
+                            case 'second':
+                            case 'pvp':
+                            case 'border':
+                            case 'first':
+                                $event->setCancelled(false);
+                                break;
+                            default:
+                                $event->setCancelled(true);
+                                $event->getPlayer()->sendMessage("§c§l» §r§7Use /uhc exit to leave the game.");
                         }
                         break;
                     case 'spawn':
@@ -381,12 +499,27 @@ class Arena extends Game implements Listener
     public function onMove(PlayerMoveEvent $event)
     {
         $to = $event->getTo();
-        if ($this->inGame($event->getPlayer())) {
+        $player = $event->getPlayer();
+        $from = $event->getFrom();
+        if ($this->inGame($player)) {
             $aabb = new AxisAlignedBB($this->minX, 0, $this->minZ, $this->maxX, $to->getLevel()->getWorldHeight(), $this->maxZ);
             if (!$aabb->isVectorInXZ($to)) {
                 $event->getPlayer()->sendPopup("§eOUT OF BORDER");
                 $event->getPlayer()->sendTitle("§4Warning", "§eYou are out of the edge");
             }
+
+            if ($from->getX() === $to->getX() && $from->getY() === $to->getY() && $from->getZ() === $to->getZ()) {
+                return;
+            }
+
+            $locations = $this->getWallBlocks($player);
+
+            /** @var Location $location */
+            foreach ($locations as $location) {
+                $position = new Position((int)floor($location->getX()), (int)floor($location->getY()), (int)floor($location->getZ()), $player->getLevel());
+                $player->getLevel()->addParticle(new RedstoneParticle($position->asVector3()));
+            }
+            $this->previousBlocks[$player->getName()] = $locations;
         }
     }
 

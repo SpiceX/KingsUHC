@@ -63,6 +63,30 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
         if ($sender instanceof Player) {
             if (isset($args[0])) {
                 switch ($args[0]) {
+                    case 'first':
+                        $arena = $this->getArenaManager()->getArenaByPlayer($sender);
+                        if ($arena !== null) {
+                            $arena->scheduler->gameTime = 46 * 60;
+                        }
+                        break;
+                    case 'pvp':
+                        $arena = $this->getArenaManager()->getArenaByPlayer($sender);
+                        if ($arena !== null) {
+                            $arena->scheduler->gameTime = 55 * 60;
+                        }
+                        break;
+                    case 'second':
+                        $arena = $this->getArenaManager()->getArenaByPlayer($sender);
+                        if ($arena !== null) {
+                            $arena->scheduler->gameTime = 30 * 60;
+                        }
+                        break;
+                    case 'border':
+                        $arena = $this->getArenaManager()->getArenaByPlayer($sender);
+                        if ($arena !== null && $args[1] !== null) {
+                            $arena->shrinkEdge((int)$args[1]);
+                        }
+                        break;
                     case 'help':
                         if (!$sender->isOp()) {
                             $sender->sendMessage("§8---------(§6Setup Mode§8)---------.\n" .
@@ -85,9 +109,10 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                         /** @var Arena $arena */
                         $arena = $this->getArenaManager()->getAvailableArena();
                         if ($arena !== null) {
-                            $arena->joinToArena($sender);
+                            $this->plugin->getJoinGameQueue()->joinToQueue($sender, $arena);
+                        } else {
+                            $this->plugin->getFormManager()->sendAvailableArenaNotFound($sender);
                         }
-
                         break;
                     case 'tops':
                         if ($sender->isOp()) {

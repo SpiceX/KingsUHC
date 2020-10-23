@@ -17,22 +17,34 @@
  */
 
 declare(strict_types=1);
+
 namespace kings\uhc\utils;
 
 
-use kings\uhc\math\Vector3;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
-use pocketmine\utils\TextFormat;
 
 class PluginUtils
 {
-	public const lineLength = 30;
+    public const lineLength = 30;
 
-	public const charWidth = 6;
+    public const charWidth = 6;
 
-	public const spaceChar = ' ';
+    public const spaceChar = ' ';
+
+    /**
+     * @return Vector3
+     */
+    public static function getRandomVector(): Vector3
+    {
+        $x = rand() / getrandmax() * 2 - 1;
+        $y = rand() / getrandmax() * 2 - 1;
+        $z = rand() / getrandmax() * 2 - 1;
+        $v = new Vector3($x, $y, $z);
+        return $v->normalize();
+    }
 
     /**
      * @param Player $player
@@ -57,7 +69,7 @@ class PluginUtils
         $cZ = $block->getZ();
 
         for ($y = $cY + 1; $y < 128; ++$y) {
-            if ($level->getBlockIdAt($cX, $y, $cZ) == Block::AIR){
+            if ($level->getBlockIdAt($cX, $y, $cZ) == Block::AIR) {
                 break;
             }
             for ($x = $cX - 4; $x <= $cX + 4; ++$x) {
@@ -69,9 +81,9 @@ class PluginUtils
                     }
 
                     ++$damage;
-                    if ($block->getId() === Block::WOOD){
-                        if ($player->getInventory()->canAddItem(Item::get(Item::WOOD))){
-                            $player->getInventory()->addItem(Item::get(Item::WOOD, 0, mt_rand(1,2)));
+                    if ($block->getId() === Block::WOOD) {
+                        if ($player->getInventory()->canAddItem(Item::get(Item::WOOD))) {
+                            $player->getInventory()->addItem(Item::get(Item::WOOD, 0, mt_rand(1, 2)));
                         }
                     }
 
@@ -81,5 +93,14 @@ class PluginUtils
             }
         }
         return $damage;
+    }
+
+    public static function assocArrayToScoreboard(array $array)
+    {
+        $string = '';
+        foreach ($array as $item) {
+            $string .= "§b- §7{$item}\n";
+        }
+        return $string;
     }
 }
