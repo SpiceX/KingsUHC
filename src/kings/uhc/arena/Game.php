@@ -5,16 +5,25 @@ namespace kings\uhc\arena;
 
 
 use Exception;
+use kings\uhc\arena\scenario\Scenarios;
 use kings\uhc\KingsUHC;
 use kings\uhc\math\Vector3;
 use kings\uhc\utils\BossBar;
 use kings\uhc\utils\Padding;
+use kings\uhc\utils\PluginUtils;
 use kings\uhc\utils\Scoreboard;
+use pocketmine\entity\Effect;
+use pocketmine\entity\EffectInstance;
+use pocketmine\entity\object\ItemEntity;
 use pocketmine\item\Item;
 use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\GameRulesChangedPacket;
+use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\Player;
 use pocketmine\scheduler\Task;
+use pocketmine\Server;
+use pocketmine\tile\Chest;
 
 abstract class Game
 {
@@ -98,6 +107,11 @@ abstract class Game
      */
     public function updateScoreboard(array $lines)
     {
+        $lastIndex = count($lines);
+        foreach ($this->scenarios as $selectedScenario) {
+            ++$lastIndex;
+            $lines[$lastIndex] = "§b- §7$selectedScenario";
+        }
         foreach ($this->scoreboards as $scoreboard) {
             /** @var Scoreboard $scoreboard */
             if (!$scoreboard->isSpawned()) {
@@ -105,8 +119,7 @@ abstract class Game
             }
             $scoreboard->removeLines();
             foreach ($lines as $index => $line) {
-                $line = str_replace(['{KILLS}', '{DISTANCE}'], [$this->killsManager->getKills($scoreboard->getOwner()), round($scoreboard->getOwner()->distance(Vector3::fromString($this->data["center"])), 1)], $line);
-                $scoreboard->setScoreLine($index, $line);
+                $scoreboard->setScoreLine($index, str_replace(['{KILLS}', '{DISTANCE}'], [$this->killsManager->getKills($scoreboard->getOwner()), round($scoreboard->getOwner()->distance(Vector3::fromString($this->data["center"])), 1)], $line));
             }
         }
     }
@@ -122,11 +135,11 @@ abstract class Game
             /** @var BossBar $bossbar */
             switch ($padding) {
                 case Padding::PADDING_CENTER:
-                    $bossbar->update(Padding::centerText($message), $life);
+                    $bossbar->update(Padding::centerText($message . " | §3" . PluginUtils::getCompassDirection($bossbar->getPlayer()->getYaw() - 90)), $life);
                     break;
                 case Padding::PADDING_LINE:
                 default:
-                    $bossbar->update(Padding::centerLine($message), $life);
+                    $bossbar->update(Padding::centerLine($message . " | §3" . PluginUtils::getCompassDirection($bossbar->getPlayer()->getYaw() - 90)), $life);
             }
 
         }
@@ -157,6 +170,10 @@ abstract class Game
             $bossbar->spawn();
         }
         foreach ($this->players as $player) {
+            /** @var Player $player */
+            if (in_array(Scenarios::CAT_EYES, $this->scenarios)) {
+                $player->addEffect(new EffectInstance(Effect::getEffect(Effect::NIGHT_VISION), 72000));
+            }
             $pk = new GameRulesChangedPacket();
             $pk->gameRules = [
                 "showcoordinates" => [
@@ -203,12 +220,32 @@ abstract class Game
                         if ($player->getArmorInventory()->getChestplate()->getId() === Item::ELYTRA) {
                             $player->getArmorInventory()->setChestplate(Item::get(Item::AIR));
                         }
+                        $player->getCraftingGrid()->clearAll();
                         foreach ($player->getInventory()->getContents() as $item) {
                             if ($item->getId() === Item::ELYTRA) {
                                 $player->getInventory()->removeItem($item);
-                                $player->sendMessage("§eElytra power has gone!");
                             }
                         }
+                        foreach ($player->getCursorInventory()->getContents() as $item) {
+                            if ($item->getId() === Item::ELYTRA) {
+                                $player->getInventory()->removeItem($item);
+                            }
+                        }
+                        foreach ($player->getLevel()->getEntities() as $entity) {
+                            if ($entity instanceof ItemEntity && $entity->getItem()->getId() === Item::ELYTRA) {
+                                $entity->close();
+                            }
+                        }
+                        foreach ($player->getLevel()->getTiles() as $tile) {
+                            if ($tile instanceof Chest) {
+                                foreach ($tile->getInventory()->getContents() as $item) {
+                                    if ($item->getId() === Item::ELYTRA) {
+                                        $tile->getInventory()->removeItem($item);
+                                    }
+                                }
+                            }
+                        }
+                        $player->sendMessage("§eElytra power has gone!");
                     }
                     KingsUHC::getInstance()->getScheduler()->cancelTask($this->getTaskId());
                 }
@@ -284,9 +321,6 @@ abstract class Game
         $player->setHealth(20);
         $this->scoreboards[$player->getName()]->despawn();
         unset($this->scoreboards[$player->getName()]);
-        foreach ($this->bossbars as $bossbar) {
-            $bossbar->despawn();
-        }
         unset($this->bossbars[$player->getName()]);
         if (isset($this->spectators[$player->getName()])) {
             unset($this->spectators[$player->getName()]);
@@ -295,6 +329,13 @@ abstract class Game
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
+        $pk = new SetSpawnPositionPacket();
+        $pk->spawnType = SetSpawnPositionPacket::TYPE_WORLD_SPAWN;
+        $pk->x = $pk->x2 = Server::getInstance()->getDefaultLevel()->getSpawnLocation()->getX();
+        $pk->y = $pk->y2 = Server::getInstance()->getDefaultLevel()->getSpawnLocation()->getY();
+        $pk->z = $pk->z2 = Server::getInstance()->getDefaultLevel()->getSpawnLocation()->getZ();
+        $pk->dimension = DimensionIds::OVERWORLD;
+        $player->sendDataPacket($pk);
         $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
         if (!$death) {
             if (!isset($this->spectators[$player->getName()])) {

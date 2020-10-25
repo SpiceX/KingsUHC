@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2020-2022 kings
+ * Copyright 2020-2022 KingsUHC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,10 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                         }
                         break;
                     case 'join':
+                        if ($this->plugin->getJoinGameQueue()->inQueue($sender)) {
+                            $sender->sendMessage("§c§l» §r§7You are in a queue");
+                            return;
+                        }
                         /** @var Arena $arena */
                         $arena = $this->getArenaManager()->getAvailableArena();
                         if ($arena !== null) {
@@ -125,7 +129,7 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                             $nbt->setTag(clone $sender->namedtag->getCompoundTag('Skin'));
                             $npc = new Leaderboard($sender->getLevel(), $nbt);
                             $npc->spawnToAll();
-                            $sender->sendMessage("§8[§9Kings§fUHC§8] §7Leaderboard has been placed.");
+                            $sender->sendMessage("§a§l» §r§7Leaderboard has been placed.");
                         }
                         break;
                     case "set":

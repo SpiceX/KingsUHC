@@ -4,54 +4,84 @@ namespace kings\uhc\utils;
 
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
-use pocketmine\math\Vector3;
+use pocketmine\level\Position;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
-use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\SetActorDataPacket;
+use pocketmine\Server;
 use pocketmine\utils\UUID;
 
 class CustomFloatingText
 {
-    /** @var array */
-    public static $store = [];
+    /** @var int */
+    private $eid;
+    /** @var string */
+    private $text;
+    /** @var Position */
+    private $position;
 
     /**
-     * @param Player $player
+     * CustomFloatingText constructor.
      * @param string $text
-     * @param Vector3 $position
+     * @param Position $position
      */
-    public static function create(Player $player, string $text, Vector3 $position): void
+    public function __construct(string $text, Position $position)
     {
-        $eid = Entity::$entityCount++;
-        self::$store[$player->getName()] = $eid;
+        $this->text = $text;
+        $this->position = $position;
+        $this->eid = Entity::$entityCount++;
+    }
+
+
+    public function spawn(): void
+    {
         $pk = new AddPlayerPacket();
-        $pk->entityRuntimeId = $eid;
+        $pk->entityRuntimeId = $this->eid;
         $pk->uuid = UUID::fromRandom();
-        $pk->username = $text;
-        $pk->entityUniqueId = $eid;
-        $pk->position = $position;
+        $pk->username = $this->text;
+        $pk->entityUniqueId = $this->eid;
+        $pk->position = $this->position->asVector3();
         $pk->item = Item::get(Item::AIR);
         $flags =
             1 << Entity::DATA_FLAG_CAN_SHOW_NAMETAG |
             1 << Entity::DATA_FLAG_ALWAYS_SHOW_NAMETAG |
             1 << Entity::DATA_FLAG_IMMOBILE;
-
         $pk->metadata = [
             Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
             Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0],
         ];
-        $player->dataPacket($pk);
+        $level = $this->position->getLevel();
+        if ($level !== null) {
+            foreach ($level->getPlayers() as $player) {
+                $player->sendDataPacket($pk);
+            }
+        }
     }
 
-    /**
-     * @param Player $player
-     */
-    public static function remove(Player $player)
+    public function update(string $text)
     {
-        if (isset(self::$store[$player->getName()])) {
-            $pk = new RemoveActorPacket();
-            $pk->entityUniqueId = self::$store[$player->getName()];
-            $player->dataPacket($pk);
+        $pk = new SetActorDataPacket();
+        $pk->entityRuntimeId = $this->eid;
+        $pk->metadata = [
+            Entity::DATA_NAMETAG => [
+                Entity::DATA_TYPE_STRING, $text
+            ]
+        ];
+        $level = $this->position->getLevel();
+        if ($level !== null) {
+            foreach ($level->getPlayers() as $player) {
+                $player->sendDataPacket($pk);
+            }
+        }
+
+    }
+
+    public function remove()
+    {
+        $pk = new RemoveActorPacket();
+        $pk->entityUniqueId = $this->eid;
+        foreach (Server::getInstance()->getOnlinePlayers() as $player) {
+            $player->sendDataPacket($pk);
         }
     }
 

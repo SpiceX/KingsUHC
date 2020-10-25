@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2020-2022 kings
+ * Copyright 2020-2022 KingsUHC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ namespace kings\uhc\utils;
 
 
 use pocketmine\block\Block;
+use pocketmine\entity\Entity;
+use pocketmine\entity\EntityIds;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\Player;
 
 class PluginUtils
@@ -51,10 +54,10 @@ class PluginUtils
      * @param Block $block
      * @return int
      */
-    public static function destroyTree(Player $player, Block $block)
+    public static function destroyTree(Player $player, Block $block): int
     {
         $damage = 0;
-        if ($block->getId() != Block::WOOD) {
+        if ($block->getId() !== Block::WOOD) {
             return $damage;
         }
         $down = $block->getSide(Vector3::SIDE_DOWN);
@@ -83,7 +86,7 @@ class PluginUtils
                     ++$damage;
                     if ($block->getId() === Block::WOOD) {
                         if ($player->getInventory()->canAddItem(Item::get(Item::WOOD))) {
-                            $player->getInventory()->addItem(Item::get(Item::WOOD, 0, mt_rand(1, 2)));
+                            $player->getInventory()->addItem(Item::get(Item::WOOD));
                         }
                     }
 
@@ -102,5 +105,45 @@ class PluginUtils
             $string .= "§b- §7{$item}\n";
         }
         return $string;
+    }
+
+    /**
+     * @param Player $player
+     */
+    public static function addLightningBolt(Player $player){
+        $pk = new AddActorPacket();
+        $pk->entityRuntimeId = $pk->entityUniqueId = Entity::$entityCount++;
+        $pk->type = AddActorPacket::LEGACY_ID_MAP_BC[EntityIds::LIGHTNING_BOLT];
+        $pk->position = $player->asPosition();
+        $pk->motion = $player->getMotion();
+        $player->sendDataPacket($pk);
+    }
+
+    public static function getCompassDirection(float $deg): string
+    {
+        //https://github.com/Muirfield/pocketmine-plugins/blob/master/GrabBag/src/aliuly/common/ExpandVars.php
+        //Determine bearing in degrees
+        $deg %= 360;
+        if ($deg < 0) {
+            $deg += 360;
+        }
+
+        if (22.5 <= $deg and $deg < 67.5) {
+            return "Northwest";
+        } elseif (67.5 <= $deg and $deg < 112.5) {
+            return "North";
+        } elseif (112.5 <= $deg and $deg < 157.5) {
+            return "Northeast";
+        } elseif (157.5 <= $deg and $deg < 202.5) {
+            return "East";
+        } elseif (202.5 <= $deg and $deg < 247.5) {
+            return "Southeast";
+        } elseif (247.5 <= $deg and $deg < 292.5) {
+            return "South";
+        } elseif (292.5 <= $deg and $deg < 337.5) {
+            return "Southwest";
+        } else {
+            return "West";
+        }
     }
 }

@@ -179,4 +179,10 @@ class BossBar extends Vector3
         return $this->player;
     }
 
+    public function __destruct()
+    {
+        $this->despawn();
+        unset($this->player);
+    }
+
 }

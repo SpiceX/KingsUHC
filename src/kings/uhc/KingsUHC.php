@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2020-2022 kings
+ * Copyright 2020-2022 KingsUHC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
  */
 
 declare(strict_types=1);
+
 namespace kings\uhc;
 
 
 use kings\uhc\arena\ArenaManager;
 use kings\uhc\commands\MainCommand;
+use kings\uhc\entities\EntityManager;
 use kings\uhc\entities\Leaderboard;
 use kings\uhc\forms\FormManager;
 use kings\uhc\provider\YamlDataProvider;
@@ -35,12 +37,12 @@ use pocketmine\plugin\PluginBase;
 class KingsUHC extends PluginBase implements Listener
 {
 
-	/** @var KingsUHC $instance */
-	public static $instance;
-	/**@var FormManager */
-	public $formManager;
-	/**@var YamlDataProvider */
-	public $dataProvider;
+    /** @var KingsUHC $instance */
+    public static $instance;
+    /**@var FormManager */
+    public $formManager;
+    /**@var YamlDataProvider */
+    public $dataProvider;
     /** @var BossBar */
     private $bossbar;
     /** @var ArenaManager */
@@ -49,33 +51,35 @@ class KingsUHC extends PluginBase implements Listener
     private $cpsCounter;
     /** @var JoinGameQueue */
     private $joinGameQueue;
+    /** @var EntityManager */
+    private $entityManager;
 
 
     public function onEnable()
-	{
-		self::$instance = $this;
-		Entity::registerEntity(Leaderboard::class, true, ['Leaderboard']);
-		$this->getServer()->getCommandMap()->register('uhc', new MainCommand($this));
-		$this->getServer()->getPluginManager()->registerEvents(new UHCListener($this), $this);
+    {
+        self::$instance = $this;
+        $this->getServer()->getCommandMap()->register('uhc', new MainCommand($this));
+        $this->getServer()->getPluginManager()->registerEvents(new UHCListener($this), $this);
         $this->getScheduler()->scheduleRepeatingTask($this->joinGameQueue = new JoinGameQueue($this), 20);
-		$this->formManager = new FormManager($this);
-		$this->dataProvider = new YamlDataProvider($this);
-		$this->arenaManager = new ArenaManager($this);
+        $this->formManager = new FormManager($this);
+        $this->dataProvider = new YamlDataProvider($this);
+        $this->arenaManager = new ArenaManager($this);
         $this->cpsCounter = new CpsCounter($this);
-	}
+        $this->entityManager = new EntityManager($this);
+    }
 
-	public function onDisable()
-	{
-		$this->arenaManager->saveArenas();
-	}
+    public function onDisable()
+    {
+        $this->arenaManager->saveArenas();
+    }
 
-	/**
-	 * @return KingsUHC
-	 */
-	public static function getInstance(): KingsUHC
-	{
-		return self::$instance;
-	}
+    /**
+     * @return KingsUHC
+     */
+    public static function getInstance(): KingsUHC
+    {
+        return self::$instance;
+    }
 
     /**
      * @return BossBar
@@ -123,5 +127,13 @@ class KingsUHC extends PluginBase implements Listener
     public function getDataProvider(): YamlDataProvider
     {
         return $this->dataProvider;
+    }
+
+    /**
+     * @return EntityManager
+     */
+    public function getEntityManager(): EntityManager
+    {
+        return $this->entityManager;
     }
 }

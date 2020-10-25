@@ -98,6 +98,22 @@ class JoinGameQueue extends Task
 
     /**
      * @param Player $player
+     * @return bool
+     */
+    public function inQueue(Player $player){
+        foreach ($this->arenas as $arena => $players) {
+            foreach ($players as $index => $wantedPlayer) {
+                /** @var Player $wantedPlayer */
+                if ($player->getId() === $wantedPlayer->getId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param Player $player
      */
     public function leaveQueue(Player $player)
     {

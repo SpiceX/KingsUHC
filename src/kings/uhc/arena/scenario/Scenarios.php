@@ -15,7 +15,6 @@ final class Scenarios
     public const SOUP = 'Soup';
     public const BOWLESS = 'Bowless';
     public const FIRELESS = 'Fireless';
-    public const BLOOD_ENCHANTS = 'BloodEnchants';
     public const LIMITATIONS = 'Limitations';
     public const BED_BOMB = 'BedBomb';
     public const BLAST_MINING = 'BlastMining';

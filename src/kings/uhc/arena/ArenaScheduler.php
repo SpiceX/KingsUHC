@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2020-2022 kings
+ * Copyright 2020-2022 KingsUHC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ namespace kings\uhc\arena;
 
 use Exception;
 use kings\uhc\math\Time;
+use kings\uhc\math\Vector3;
 use pocketmine\scheduler\Task;
 
 class ArenaScheduler extends Task
@@ -58,21 +59,15 @@ class ArenaScheduler extends Task
         switch ($this->arena->phase) {
             case Arena::PHASE_GAME:
                 $this->arena->checkPlayersInsideBorder();
-                $lines = [
-                    2 => "§7------------------",
-                    3 => "§bRemaining: §7" . count($this->arena->players),
-                    4 => "§bKills: §7{KILLS}",
-                    5 => "§7------------------",
-                    6 => "§bBorder: §7" . $this->arena->maxX,
-                    7 => "§bCenter: §7{DISTANCE}",
-                    8 => "§bScenarios:",
-                ];
-                $lastIndex = count($lines);
-                foreach ($this->arena->scenarios as $selectedScenario) {
-                    $lastIndex++;
-                    $lines[$lastIndex] = "§b- §7$selectedScenario";
-                }
-                $this->arena->updateScoreboard($lines);
+                $this->arena->updateScoreboard([
+                    1 => "§7------------------",
+                    2 => "§bRemaining: §7" . count($this->arena->players),
+                    3 => "§bKills: §7{KILLS}",
+                    4 => "§7------------------",
+                    5 => "§bBorder: §7" . $this->arena->border,
+                    6 => "§bCenter: §7{DISTANCE}",
+                    7 => "§bScenarios:",
+                ]);
                 $this->arena->updateBossbar("§f§lMap: §r§9 " . $this->arena->level->getFolderName() . " §l§b» §r§f" . Time::calculateTime($this->gameTime));
                 switch ($this->gameTime) {
                     case 55 * 60:
@@ -98,7 +93,7 @@ class ArenaScheduler extends Task
                         break;
                 }
                 if ($this->gameTime <= (30 * 60)) {
-                    if ($this->arena->maxX > 30) {
+                    if ($this->arena->border > 50) {
                         $this->arena->shrinkEdge(1);
                     }
                 }
@@ -140,11 +135,13 @@ class ArenaScheduler extends Task
         $this->arena->disablePvP();
         $this->gameTime = 60 * 60;
         $this->restartTime = 10;
-        $this->arena->maxX = 1000;
-        $this->arena->minX = -1000;
-        $this->arena->maxZ = 1000;
-        $this->arena->minZ = -1000;
+        $center = Vector3::fromString($this->arena->data['center']);
+        $this->arena->maxX = $center->add($this->arena->border)->getX();
+        $this->arena->minX = $center->subtract($this->arena->border)->getX();
+        $this->arena->maxZ = $center->add(0, 0, $this->arena->border)->getZ();
+        $this->arena->minZ = $center->subtract(0, 0, $this->arena->border)->getZ();
         $this->arena->voteManager->reload();
         $this->arena->killsManager->reload();
+        $this->arena->limitationsStorage->reload();
     }
 }
