@@ -1,16 +1,12 @@
 <?php
 
-
 namespace kings\uhc;
 
-
-use kings\uhc\entities\Leaderboard;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\item\Item;
-use pocketmine\Player;
 
 class UHCListener implements Listener
 {
@@ -25,18 +21,6 @@ class UHCListener implements Listener
     public function __construct(KingsUHC $plugin)
     {
         $this->plugin = $plugin;
-    }
-
-    /**
-     * @param EntityDamageByEntityEvent $event
-     */
-    public function onDamage(EntityDamageByEntityEvent $event)
-    {
-        $player = $event->getDamager();
-        $npc = $event->getEntity();
-        if ($player instanceof Player && $npc instanceof Leaderboard) {
-            $event->setCancelled(true);
-        }
     }
 
     public function onPlayerQuit(PlayerQuitEvent $event)
@@ -63,6 +47,17 @@ class UHCListener implements Listener
                     }
                     break;
             }
+        }
+    }
+
+    /**
+     * @param PlayerDropItemEvent $event
+     */
+    public function onPlayerDropItem(PlayerDropItemEvent $event)
+    {
+        $player = $event->getPlayer();
+        if ($this->plugin->getJoinGameQueue()->inQueue($player)){
+            $event->setCancelled();
         }
     }
 }

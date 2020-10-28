@@ -24,7 +24,6 @@ namespace kings\uhc\commands;
 use kings\uhc\arena\Arena;
 use kings\uhc\arena\ArenaManager;
 use kings\uhc\entities\types\EndCrystal;
-use kings\uhc\entities\types\JoinGameEntity;
 use kings\uhc\entities\types\Leaderboard;
 use kings\uhc\KingsUHC;
 use pocketmine\command\CommandSender;
@@ -123,15 +122,14 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                     case 'npc':
                         if ($sender->isOp()) {
                             foreach ($sender->getLevel()->getEntities() as $entity) {
-                                if ($entity instanceof JoinGameEntity) {
+                                if ($entity instanceof EndCrystal) {
                                     $entity->close();
                                 }
                             }
                             $nbt = Entity::createBaseNBT($sender->asVector3());
                             $crystal = Entity::createEntity("EnderCrystalUHC", $sender->getLevel(), $nbt);
-                            if($crystal instanceof EndCrystal){
+                            if ($crystal instanceof EndCrystal) {
                                 $crystal->spawnToAll();
-
                             }
                         }
                         break;

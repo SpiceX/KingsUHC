@@ -1,8 +1,6 @@
 <?php
 
-
 namespace kings\uhc\arena;
-
 
 use Exception;
 use kings\uhc\arena\scenario\Scenarios;
@@ -233,6 +231,9 @@ abstract class Game
                 $this->seconds++;
                 if ($this->seconds === 40) {
                     foreach ($this->players as $player) {
+                        if (!$player instanceof Player) {
+                            continue;
+                        }
                         if ($player->getArmorInventory()->getChestplate()->getId() === Item::ELYTRA) {
                             $player->getArmorInventory()->setChestplate(Item::get(Item::AIR));
                         }

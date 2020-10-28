@@ -41,6 +41,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDeathEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\inventory\CraftItemEvent;
@@ -233,6 +234,42 @@ class Arena extends Game implements Listener
                             $inventory->removeItem($content);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param EntityDeathEvent $event
+     */
+    public function onEntityDeath(EntityDeathEvent $event)
+    {
+        $entity = $event->getEntity();
+        if ($this->level->getFolderName() === $entity->getLevel()->getFolderName()) {
+            if (in_array(Scenarios::CUTCLEAN, $this->scenarios, true)) {
+                switch ($entity->getName()) {
+                    case "Cow":
+                        $event->setDrops([Item::get(Item::STEAK)]);
+                        break;
+                    case "Chicken":
+                        $event->setDrops([Item::get(Item::COOKED_CHICKEN)]);
+                        break;
+                    case "Fish":
+                        $event->setDrops([Item::get(Item::COOKED_FISH)]);
+                        break;
+                    case "Sheep":
+                        $event->setDrops([Item::get(Item::COOKED_MUTTON)]);
+                        break;
+                    case "Pig":
+                    case "Piggy":
+                        $event->setDrops([Item::get(Item::COOKED_PORKCHOP)]);
+                        break;
+                    case "Rabbit":
+                        $event->setDrops([Item::get(Item::COOKED_RABBIT)]);
+                        break;
+                    case "Salmon":
+                        $event->setDrops([Item::get(Item::COOKED_SALMON)]);
+                        break;
                 }
             }
         }
@@ -506,7 +543,7 @@ class Arena extends Game implements Listener
         $damager = $event->getDamager();
         $victim = $event->getEntity();
         if ($damager instanceof Player && $victim instanceof Player) {
-            if (!$this->inGame($damager)){
+            if (!$this->inGame($damager)) {
                 return;
             }
             if (!$this->pvpEnabled) {

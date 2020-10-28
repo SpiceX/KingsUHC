@@ -49,13 +49,13 @@ class ArenaManager implements Listener
      */
     public function getTotalPlaying(): int
     {
-        $count = 0;
+        $count = [];
         foreach ($this->arenas as $arena) {
             foreach ($arena->players as $player) {
-                $count++;
+                $count[] = $player;
             }
         }
-        return $count;
+        return count($count);
     }
 
     /**
@@ -63,13 +63,13 @@ class ArenaManager implements Listener
      */
     public function getTotalSpectating(): int
     {
-        $count = 0;
+        $count = [];
         foreach ($this->arenas as $arena) {
             foreach ($arena->spectators as $spectator) {
-                $count++;
+                $count[] = $spectator;
             }
         }
-        return $count;
+        return count($count);
     }
 
     public function saveArenas()

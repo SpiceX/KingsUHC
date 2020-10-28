@@ -24,7 +24,10 @@ namespace kings\uhc\utils;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntityIds;
+use pocketmine\entity\object\ItemEntity;
 use pocketmine\item\Item;
+use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\Player;
@@ -110,7 +113,8 @@ class PluginUtils
     /**
      * @param Player $player
      */
-    public static function addLightningBolt(Player $player){
+    public static function addLightningBolt(Player $player)
+    {
         $pk = new AddActorPacket();
         $pk->entityRuntimeId = $pk->entityUniqueId = Entity::$entityCount++;
         $pk->type = AddActorPacket::LEGACY_ID_MAP_BC[EntityIds::LIGHTNING_BOLT];

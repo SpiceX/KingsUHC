@@ -73,7 +73,7 @@ class EndCrystal extends Entity
             $source->setCancelled(true);
             $player = $source->getDamager();
             if ($player instanceof Player) {
-                if (!KingsUHC::getInstance()->getSqliteProvider()->verifyPlayerInDB($player)){
+                if (!KingsUHC::getInstance()->getSqliteProvider()->verifyPlayerInDB($player)) {
                     KingsUHC::getInstance()->getSqliteProvider()->addPlayer($player);
                 }
                 if (KingsUHC::getInstance()->getJoinGameQueue()->inQueue($player)) {
@@ -91,16 +91,16 @@ class EndCrystal extends Entity
             }
         }
     }
-    
+
     public function entityBaseTick(int $tickDiff = 1): bool
     {
         $size = 1.2;
         $x = $this->getX();
         $y = $this->getY();
         $z = $this->getZ();
-        $a = cos(deg2rad($this->radius/0.09))* $size;
-        $b = sin(deg2rad($this->radius/0.09))* $size;
-        $c = cos(deg2rad($this->radius/0.3))* $size;
+        $a = cos(deg2rad($this->radius / 0.09)) * $size;
+        $b = sin(deg2rad($this->radius / 0.09)) * $size;
+        $c = cos(deg2rad($this->radius / 0.3)) * $size;
         $this->getLevel()->addParticle(new GenericParticle(new Vector3($x - $a, $y + $c + 1.4, $z - $b), Particle::TYPE_SHULKER_BULLET));
         $this->getLevel()->addParticle(new GenericParticle(new Vector3($x + $a, $y + $c + 1.4, $z + $b), Particle::TYPE_SHULKER_BULLET));
         $this->radius++;
