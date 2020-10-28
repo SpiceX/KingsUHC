@@ -99,6 +99,22 @@ abstract class Game
                     break;
             }
         }
+        foreach ($this->spectators as $spectator) {
+            switch ($id) {
+                case Arena::MSG_MESSAGE:
+                    $spectator->sendMessage($message);
+                    break;
+                case Arena::MSG_TIP:
+                    $spectator->sendTip($message);
+                    break;
+                case Arena::MSG_POPUP:
+                    $spectator->sendPopup($message);
+                    break;
+                case Arena::MSG_TITLE:
+                    $spectator->sendTitle($message, $subMessage);
+                    break;
+            }
+        }
     }
 
     /**
@@ -273,13 +289,21 @@ abstract class Game
         }
         if ($winner) {
             $player->sendTitle("§aVictory!", "§7You are the winner");
+            $this->plugin->getSqliteProvider()->addWin($player);
+            $this->broadcastMessage("§6==================\n" .
+                "  §6Winner: §7{$player->getName()}\n" .
+                "  §6Kills: §7" . $this->killsManager->getKills($player) . "\n" .
+                "  §6==================\n"
+            );
             $this->plugin->getServer()->broadcastMessage("§6§l» §r§7Player §6{$player->getName()}§7 won the game at {$this->level->getFolderName()}!");
         } else {
             foreach ($this->players as $player) {
                 $player->sendTitle("§cGAME OVER!", "§7Good luck next time");
+                $this->plugin->getSqliteProvider()->addLose($player);
             }
             $this->plugin->getServer()->broadcastMessage("§6§l» §r§7No winners at {$this->level->getFolderName()}!");
         }
+
         $this->phase = Arena::PHASE_RESTART;
     }
 

@@ -2,7 +2,9 @@
 
 namespace kings\uhc\entities;
 
+use kings\uhc\entities\task\UpdateJoinGameEntity;
 use kings\uhc\entities\types\Creeper;
+use kings\uhc\entities\types\EndCrystal;
 use kings\uhc\entities\types\Leaderboard;
 use kings\uhc\KingsUHC;
 use pocketmine\entity\Entity;
@@ -24,6 +26,7 @@ class EntityManager
     {
         Entity::registerEntity(Leaderboard::class, true, ['Leaderboard']);
         Entity::registerEntity(Creeper::class, true, ['Creeper', 'minecraft:creeper']);
+        Entity::registerEntity(EndCrystal::class, true, ['EnderCrystalUHC', 'minecraft:endercrystaluhc']);
     }
 
 }

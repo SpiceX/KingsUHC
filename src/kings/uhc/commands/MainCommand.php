@@ -23,7 +23,9 @@ namespace kings\uhc\commands;
 
 use kings\uhc\arena\Arena;
 use kings\uhc\arena\ArenaManager;
-use kings\uhc\entities\Leaderboard;
+use kings\uhc\entities\types\EndCrystal;
+use kings\uhc\entities\types\JoinGameEntity;
+use kings\uhc\entities\types\Leaderboard;
 use kings\uhc\KingsUHC;
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginCommand;
@@ -116,6 +118,21 @@ class MainCommand extends PluginCommand implements PluginIdentifiableCommand
                             $this->plugin->getJoinGameQueue()->joinToQueue($sender, $arena);
                         } else {
                             $this->plugin->getFormManager()->sendAvailableArenaNotFound($sender);
+                        }
+                        break;
+                    case 'npc':
+                        if ($sender->isOp()) {
+                            foreach ($sender->getLevel()->getEntities() as $entity) {
+                                if ($entity instanceof JoinGameEntity) {
+                                    $entity->close();
+                                }
+                            }
+                            $nbt = Entity::createBaseNBT($sender->asVector3());
+                            $crystal = Entity::createEntity("EnderCrystalUHC", $sender->getLevel(), $nbt);
+                            if($crystal instanceof EndCrystal){
+                                $crystal->spawnToAll();
+
+                            }
                         }
                         break;
                     case 'tops':

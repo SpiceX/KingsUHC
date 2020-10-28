@@ -90,13 +90,17 @@ class FormManager
      * @param Player $player
      * @param array $players
      */
-    public function sendSpectatePlayer(Player $player, array $players){
-        $form = new MenuForm("§l§9Kings§fUHC", "§7Select a player:", $players,
-        function (Player $player, Button $selected) use ($players): void {
-            /** @var Player[] $players */
-            $player->teleport($players[$selected->getText()]->asPosition());
-            $player->sendMessage("§l§a» §r§7Now Spectating " . $players[$selected->getText()]->getName());
-        });
+    public function sendSpectatePlayer(Player $player, array $players)
+    {
+        $form = new MenuForm("§l§9Kings§fUHC", "§7Select a player:", $this->playersArrayToButtons($players),
+            function (Player $player, Button $selected) use ($players): void {
+                if (!is_array($players) || empty($players)) {
+                    return;
+                }
+                /** @var Player[] $players */
+                $player->teleport($players[$selected->getText()]->asPosition());
+                $player->sendMessage("§l§a» §r§7Now Spectating " . $players[$selected->getText()]->getName());
+            });
         $player->sendForm($form);
     }
 
@@ -107,6 +111,15 @@ class FormManager
             $buttons[] = new Button($name . "\n§aPlaying: " . count($arena->players), new Image("https://mcgamer.net/img/logo/uhc.png", Image::TYPE_URL));
         }
         return $buttons;
+    }
+
+    private function playersArrayToButtons(array $players)
+    {
+        $array = [];
+        foreach ($players as $player) {
+            $array[] = new Button($player->getName());
+        }
+        return $array;
     }
 
     public function getScenarioButtons()

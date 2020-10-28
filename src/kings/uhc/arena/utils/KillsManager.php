@@ -42,6 +42,20 @@ class KillsManager
         return $this->kills[$player->getName()] ?? 0;
     }
 
+    public function getTopKills(){
+        $mostKills = [];
+        $string = '';
+        arsort($this->kills);
+        $scenarios = array_keys($this->kills);
+        for ($i = 0; $i < 3; $i++) {
+            $selectedScenarios[] = $scenarios[$i] ?? '';
+        }
+        foreach ($mostKills as $mostKill) {
+            $string .= "§6- §e$mostKill  §6Kills: §e" . $this->kills[$mostKill] ?? 5 . "\n";
+        }
+        return $string;
+    }
+
     public function reload()
     {
         $this->kills = [];

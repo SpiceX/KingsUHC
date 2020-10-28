@@ -65,14 +65,9 @@ use pocketmine\level\Location;
 use pocketmine\level\particle\RedstoneParticle;
 use pocketmine\level\Position;
 use pocketmine\math\AxisAlignedBB;
-use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\Player;
-use pocketmine\tile\Chest;
-use pocketmine\tile\Container;
-use pocketmine\tile\Tile;
 
 
 class Arena extends Game implements Listener
@@ -220,6 +215,7 @@ class Arena extends Game implements Listener
         $this->minZ = $center->subtract(0, 0, $this->border)->getZ();
         $this->phase = static::PHASE_LOBBY;
         $this->players = [];
+        $this->spectators = [];
         $this->scoreboards = [];
         $this->bossbars = [];
     }
@@ -442,7 +438,8 @@ class Arena extends Game implements Listener
         if ($this->inGame($player)) {
             if (in_array(Scenarios::BED_BOMB, $this->scenarios)) {
                 if ($event->getBlock()->getId() === BlockIds::BED_BLOCK) {
-                    $explosion = new Explosion($event->getBlock()->asPosition(), 6);
+                    $event->setCancelled();
+                    $explosion = new Explosion($event->getBlock()->asPosition(), 5);
                     $explosion->explodeA();
                     $explosion->explodeB();
                 }
@@ -470,20 +467,8 @@ class Arena extends Game implements Listener
         }
         $this->toRespawn[$player->getName()] = $player;
         if (in_array(Scenarios::TIME_BOMB, $this->scenarios)) {
-            $block = Block::get(Block::CHEST);
-            $nbt = Chest::createNBT($player->asVector3());
-            $items = [];
-            foreach ($event->getDrops() as $slot => $item) {
-                $items[] = $item->nbtSerialize($slot);
-            }
-            $nbt->setTag(new ListTag(Container::TAG_ITEMS, $items, NBT::TAG_Compound));
-            Tile::createTile("Chest", $player->getLevel(), $nbt);
-            $player->getLevel()->setBlock($player->asVector3(), $block);
-            $tile = $player->getLevel()->getTile($player->asVector3());
-            if ($tile instanceof Chest) {
-                $tile->getRealInventory()->setContents($event->getDrops());
-            }
-            $this->plugin->getScheduler()->scheduleRepeatingTask(new TimeBombTask($player->asPosition()), 20);
+            TimeBombTask::createChest($player, $event->getDrops());
+            $this->plugin->getScheduler()->scheduleRepeatingTask(new TimeBombTask($this, $player->asPosition()), 20);
             $event->setDrops([]);
         }
         /** DIAMONDLESS SCENARIO */
@@ -520,15 +505,16 @@ class Arena extends Game implements Listener
     {
         $damager = $event->getDamager();
         $victim = $event->getEntity();
-        if (!$this->pvpEnabled) {
-            if ($damager instanceof Player && $victim instanceof Player) {
+        if ($damager instanceof Player && $victim instanceof Player) {
+            if (!$this->inGame($damager)){
+                return;
+            }
+            if (!$this->pvpEnabled) {
                 $event->setCancelled();
                 $damager->sendMessage("§c§l»§r §7PvP is disabled!");
                 return;
             }
-        }
-        if ($event->getFinalDamage() >= $victim->getHealth()) {
-            if ($damager instanceof Player && $victim instanceof Player) {
+            if ($event->getFinalDamage() >= $victim->getHealth()) {
                 $this->killsManager->addKill($damager);
             }
         }
@@ -609,6 +595,7 @@ class Arena extends Game implements Listener
                     case 'uhc':
                         switch ($args[1]) {
                             case 'leave':
+                            case 'exit':
                                 $this->disconnectPlayer($event->getPlayer(), "§a§l» §r§7You have successfully left the game!");
                                 break;
                             case 'second':
@@ -753,6 +740,33 @@ class Arena extends Game implements Listener
                     $event->setDrops([Item::get(Item::IRON_INGOT)]);
                     break;
             }
+        } elseif (in_array(Scenarios::DOUBLE_ORES, $this->scenarios)) {
+            switch ($block->getId()) {
+                case Block::GOLD_ORE:
+                    $event->setDrops([Item::get(Item::GOLD_INGOT, 0, 2)]);
+                    break;
+                case Block::DIAMOND_ORE:
+                    $event->setDrops([Item::get(Item::DIAMOND, 0, 2)]);
+                    break;
+                case Block::IRON_ORE:
+                    $event->setDrops([Item::get(Item::IRON_INGOT, 0, 2)]);
+                    break;
+                case Block::COAL_ORE:
+                    $event->setDrops([Item::get(Item::COAL, 0, 4)]);
+                    break;
+                case Block::EMERALD_ORE:
+                    $event->setDrops([Item::get(Item::EMERALD, 0, 2)]);
+                    break;
+                case Block::REDSTONE_ORE:
+                    $event->setDrops([Item::get(Item::REDSTONE, 0, 12)]);
+                    break;
+                case Block::LAPIS_ORE:
+                    $event->setDrops([Item::get(Item::LAPIS_ORE, 0, 12)]);
+                    break;
+                case Block::NETHER_QUARTZ_ORE:
+                    $event->setDrops([Item::get(Item::NETHER_QUARTZ, 0, 6)]);
+                    break;
+            }
         }
         if (in_array(Scenarios::BLOOD_DIAMONDS, $this->scenarios)) {
             switch ($block->getId()) {
@@ -783,6 +797,7 @@ class Arena extends Game implements Listener
                     if (!$this->limitationsStorage->canBreakOre($player, LimitationsStorage::GOLD_TYPE)) {
                         $player->sendMessage("§c§l» §r§7You have reached the limit of gold ingots");
                         $event->setCancelled(true);
+                        return;
                     }
                     $player->sendMessage("§e§l» §r§7Gold ingots count: §e(" . $this->limitationsStorage->getOreCount($player, LimitationsStorage::GOLD_TYPE) . "/32)");
                     $this->limitationsStorage->addOreCount($player, LimitationsStorage::GOLD_TYPE);
@@ -791,6 +806,7 @@ class Arena extends Game implements Listener
                     if (!$this->limitationsStorage->canBreakOre($player, LimitationsStorage::DIAMOND_TYPE)) {
                         $player->sendMessage("§c§l» §r§7You have reached the limit of diamonds");
                         $event->setCancelled(true);
+                        return;
                     }
                     $player->sendMessage("§e§l» §r§7Diamonds count: §e(" . $this->limitationsStorage->getOreCount($player, LimitationsStorage::DIAMOND_TYPE) . "/16)");
                     $this->limitationsStorage->addOreCount($player, LimitationsStorage::DIAMOND_TYPE);
@@ -799,6 +815,7 @@ class Arena extends Game implements Listener
                     if (!$this->limitationsStorage->canBreakOre($player, LimitationsStorage::IRON_TYPE)) {
                         $player->sendMessage("§c§l» §r§7You have reached the limit of iron ingots");
                         $event->setCancelled(true);
+                        return;
                     }
                     $player->sendMessage("§e§l» §r§7Iron ingots count: §e(" . $this->limitationsStorage->getOreCount($player, LimitationsStorage::IRON_TYPE) . "/64)");
                     $this->limitationsStorage->addOreCount($player, LimitationsStorage::IRON_TYPE);
@@ -827,36 +844,9 @@ class Arena extends Game implements Listener
                     break;
             }
         }
-        if (in_array(Scenarios::DOUBLE_ORES, $this->scenarios)) {
-            switch ($block->getId()) {
-                case Block::GOLD_ORE:
-                    $event->setDrops([Item::get(Item::GOLD_INGOT, 0, 2)]);
-                    break;
-                case Block::DIAMOND_ORE:
-                    $event->setDrops([Item::get(Item::DIAMOND, 0, 2)]);
-                    break;
-                case Block::IRON_ORE:
-                    $event->setDrops([Item::get(Item::IRON_INGOT, 0, 2)]);
-                    break;
-                case Block::COAL_ORE:
-                    $event->setDrops([Item::get(Item::COAL, 0, 4)]);
-                    break;
-                case Block::EMERALD_ORE:
-                    $event->setDrops([Item::get(Item::EMERALD, 0, 2)]);
-                    break;
-                case Block::REDSTONE_ORE:
-                    $event->setDrops([Item::get(Item::REDSTONE, 0, 12)]);
-                    break;
-                case Block::LAPIS_ORE:
-                    $event->setDrops([Item::get(Item::LAPIS_ORE, 0, 12)]);
-                    break;
-                case Block::NETHER_QUARTZ_ORE:
-                    $event->setDrops([Item::get(Item::NETHER_QUARTZ, 0, 6)]);
-                    break;
-            }
-        }
+
         if (in_array(Scenarios::BLAST_MINING, $this->scenarios)) {
-            $nbt = Entity::createBaseNBT($block->asVector3());
+            $nbt = Entity::createBaseNBT(new \pocketmine\math\Vector3($block->getX(), $block->getY() + 1, $block->getZ()));
             switch ($block->getId()) {
                 case Block::GOLD_ORE:
                 case Block::DIAMOND_ORE:
@@ -866,12 +856,14 @@ class Arena extends Game implements Listener
                 case Block::REDSTONE_ORE:
                 case Block::LAPIS_ORE:
                 case Block::NETHER_QUARTZ_ORE:
-                    if (random_int(1, 10) === 5) {
-                        Entity::createEntity('PrimedTNT', $block->getLevel(), $nbt);
-                    } elseif (random_int(1, 10) === 3) {
+                    if (random_int(1, 20) === 11) {
+                        $tnt = Entity::createEntity('PrimedTNT', $block->getLevel(), $nbt);
+                        $tnt->spawnToAll();
+                    } elseif (random_int(1, 20) === 13) {
                         /** @var Creeper $creeper */
                         $creeper = Entity::createEntity('minecraft:creeper', $block->getLevel(), $nbt);
-                        $creeper->isIgnited();
+                        $creeper->spawnToAll();
+                        $creeper->setIgnited(true);
                     }
                     break;
             }
@@ -886,7 +878,8 @@ class Arena extends Game implements Listener
         }
         if (in_array(Scenarios::SOUP, $this->scenarios)) {
             if ($event->getItem()->getId() === Item::MUSHROOM_STEW) {
-                $player->setHealth($player->getHealth() + 2);
+                $player->setHealth($player->getHealth() + 4);
+                $player->getInventory()->setItemInHand(Item::get(Item::BOWL));
             }
         }
     }
@@ -896,6 +889,7 @@ class Arena extends Game implements Listener
         $player = $event->getEntity();
         if ($player instanceof Player && $this->inGame($player)) {
             if (in_array(Scenarios::BOWLESS, $this->scenarios)) {
+                $player->sendMessage("§cBowless scenario is enabled!");
                 $event->setForce(0);
                 $event->getProjectile()->close();
             }

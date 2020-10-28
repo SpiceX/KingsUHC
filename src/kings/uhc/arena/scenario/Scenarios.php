@@ -6,21 +6,21 @@ use ReflectionClass;
 
 final class Scenarios
 {
-    public const CUTCLEAN = 'CutClean';
-    public const DIAMONDLESS = 'Diamondless';
-    public const GOLDLESS = 'Goldless';
-    public const BLOOD_DIAMONDS = 'BloodDiamonds';
-    public const TIME_BOMB = 'TimeBomb';
-    public const BAREBONES = 'BareBones';
-    public const SOUP = 'Soup';
-    public const BOWLESS = 'Bowless';
-    public const FIRELESS = 'Fireless';
-    public const LIMITATIONS = 'Limitations';
-    public const BED_BOMB = 'BedBomb';
+    public const CUTCLEAN = 'CutClean'; // ok
+    public const DIAMONDLESS = 'Diamondless'; // ok
+    public const GOLDLESS = 'Goldless'; // ok
+    public const BLOOD_DIAMONDS = 'BloodDiamonds'; // ok
+    public const TIME_BOMB = 'TimeBomb'; // ok
+    public const BAREBONES = 'BareBones'; // ok
+    public const SOUP = 'Soup'; // ok
+    public const BOWLESS = 'Bowless'; // ok
+    public const FIRELESS = 'Fireless'; // ok
+    public const LIMITATIONS = 'Limitations'; // ok
+    public const BED_BOMB = 'BedBomb'; // ok
     public const BLAST_MINING = 'BlastMining';
-    public const CAT_EYES = 'CatEyes';
-    public const GAMBLE = 'Gamble';
-    public const DOUBLE_ORES = 'DoubleOres';
+    public const CAT_EYES = 'CatEyes'; // ok
+    public const GAMBLE = 'Gamble'; // ok
+    public const DOUBLE_ORES = 'DoubleOres'; // ok
     public const TREE_CAPITATOR = 'TreeCapitator';
 
     /**

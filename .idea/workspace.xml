@@ -20,32 +20,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bff09cc0-786d-4dec-baa1-553ae04465e3" name="Default Changelist" comment="&#10;commit">
-      <change afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/LimitationsStorage.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/TimeBombTask.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kings/uhc/entities/EntityManager.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/Creeper.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/EndCrystal.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/KingsUHC.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaScheduler.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Game.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/Scenarios.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/utils/MapReset.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/utils/MapReset.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/TimeBombTask.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/scenario/TimeBombTask.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/utils/KillsManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/utils/KillsManager.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/Leaderboard.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/Leaderboard.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/EntityManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/EntityManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/types/Creeper.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/Creeper.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/types/Leaderboard.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/Leaderboard.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/FormManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/FormManager.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Button.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Button.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Element.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Element.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Image.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/elements/Image.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/types/Form.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/types/Form.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/forms/types/MenuForm.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/forms/types/MenuForm.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/math/Time.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/math/Time.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/math/Vector3.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/math/Vector3.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/provider/YamlDataProvider.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/task/JoinGameQueue.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/BossBar.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/BossBar.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/CustomFloatingText.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/CustomFloatingText.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/kings/uhc/provider/SQLite3Provider.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/provider/SQLite3Provider.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +146,8 @@
       <workItem from="1603304515881" duration="2669000" />
       <workItem from="1603321834620" duration="11770000" />
       <workItem from="1603459362767" duration="24695000" />
-      <workItem from="1603557504380" duration="33454000" />
+      <workItem from="1603557504380" duration="33479000" />
+      <workItem from="1603831747440" duration="16574000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <created>1603307992864</created>
@@ -180,7 +170,14 @@
       <option name="project" value="LOCAL" />
       <updated>1603484741829</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="&#10;commit">
+      <created>1603597290754</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1603597290754</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,22 +201,26 @@
     <option name="LAST_COMMIT_MESSAGE" value="&#10;commit" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="60" y="205" key="#SQL_Dialects" timestamp="1603841858215">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="60" y="205" key="#SQL_Dialects/0.0.1366.738@0.0.1366.738" timestamp="1603841858215" />
     <state x="440" y="159" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1603136507197">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="440" y="159" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.738@0.0.1366.738" timestamp="1603136507197" />
-    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser" timestamp="1603592557443">
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser" timestamp="1603843842416">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser/0.0.1366.738@0.0.1366.738" timestamp="1603592557443" />
+    <state x="487" y="37" key="#com.intellij.ide.util.MemberChooser/0.0.1366.738@0.0.1366.738" timestamp="1603843842416" />
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1603131109215">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="0" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1366.738@0.0.1366.738" timestamp="1603131109215" />
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603596754053">
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603844317248">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603596754053" />
+    <state x="413" y="124" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603844317248" />
     <state x="463" y="124" key="FileChooserDialogImpl" timestamp="1603131042462">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
@@ -232,21 +233,21 @@
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="499" y="0" key="Github.UntrackedFilesDialog/0.0.1366.738@0.0.1366.738" timestamp="1603155771649" />
-    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603584889459">
+    <state x="419" y="76" key="NewPhpClassDialog" timestamp="1603843834679">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603584889459" />
+    <state x="419" y="76" key="NewPhpClassDialog/0.0.1366.738@0.0.1366.738" timestamp="1603843834679" />
     <state x="184" y="14" key="SettingsEditor" timestamp="1603157166114">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="184" y="14" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1603157166114" />
-    <state x="275" y="98" key="Vcs.Push.Dialog.v2" timestamp="1603484750330">
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2" timestamp="1603597293595">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="275" y="98" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1603484750330" />
-    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603596726455">
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1603597293595" />
+    <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603843486935">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603596726455" />
+    <state x="391" y="57" width="583" height="624" key="find.popup/0.0.1366.738@0.0.1366.738" timestamp="1603843486935" />
   </component>
 </project>

@@ -2,6 +2,7 @@
 
 namespace kings\uhc\entities\types;
 
+use kings\uhc\KingsUHC;
 use pocketmine\entity\Monster;
 use pocketmine\item\Item;
 use pocketmine\level\Explosion;
@@ -9,6 +10,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\Player;
+use pocketmine\scheduler\Task;
 
 class Creeper extends Monster
 {

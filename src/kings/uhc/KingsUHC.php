@@ -26,6 +26,7 @@ use kings\uhc\commands\MainCommand;
 use kings\uhc\entities\EntityManager;
 use kings\uhc\entities\Leaderboard;
 use kings\uhc\forms\FormManager;
+use kings\uhc\provider\SQLite3Provider;
 use kings\uhc\provider\YamlDataProvider;
 use kings\uhc\task\JoinGameQueue;
 use kings\uhc\utils\BossBar;
@@ -53,6 +54,8 @@ class KingsUHC extends PluginBase implements Listener
     private $joinGameQueue;
     /** @var EntityManager */
     private $entityManager;
+    /** @var SQLite3Provider */
+    private $sqliteProvider;
 
 
     public function onEnable()
@@ -62,6 +65,7 @@ class KingsUHC extends PluginBase implements Listener
         $this->getServer()->getPluginManager()->registerEvents(new UHCListener($this), $this);
         $this->getScheduler()->scheduleRepeatingTask($this->joinGameQueue = new JoinGameQueue($this), 20);
         $this->formManager = new FormManager($this);
+        $this->sqliteProvider = new SQLite3Provider($this->getDataFolder() . 'database.sq3');
         $this->dataProvider = new YamlDataProvider($this);
         $this->arenaManager = new ArenaManager($this);
         $this->cpsCounter = new CpsCounter($this);
@@ -135,5 +139,13 @@ class KingsUHC extends PluginBase implements Listener
     public function getEntityManager(): EntityManager
     {
         return $this->entityManager;
+    }
+
+    /**
+     * @return SQLite3Provider
+     */
+    public function getSqliteProvider(): SQLite3Provider
+    {
+        return $this->sqliteProvider;
     }
 }

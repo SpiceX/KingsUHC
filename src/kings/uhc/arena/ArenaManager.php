@@ -44,6 +44,34 @@ class ArenaManager implements Listener
         }
     }
 
+    /**
+     * @return int
+     */
+    public function getTotalPlaying(): int
+    {
+        $count = 0;
+        foreach ($this->arenas as $arena) {
+            foreach ($arena->players as $player) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalSpectating(): int
+    {
+        $count = 0;
+        foreach ($this->arenas as $arena) {
+            foreach ($arena->spectators as $spectator) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
     public function saveArenas()
     {
         foreach ($this->arenas as $fileName => $arena) {
@@ -78,7 +106,7 @@ class ArenaManager implements Listener
     {
         foreach ($this->arenas as $arena) {
             foreach ($arena->players as $players) {
-                if ($player->getId() === $players->getId()){
+                if ($player->getId() === $players->getId()) {
                     return $arena;
                 }
             }
@@ -226,7 +254,7 @@ class ArenaManager implements Listener
     public function getAvailableArena(): ?Arena
     {
         foreach ($this->arenas as $arena) {
-            if ($arena->phase === Arena::PHASE_LOBBY && count($arena->players) < (int)$arena->data['slots']){
+            if ($arena->phase === Arena::PHASE_LOBBY && count($arena->players) < (int)$arena->data['slots']) {
                 return $arena;
             }
         }
