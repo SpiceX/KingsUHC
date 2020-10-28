@@ -21,14 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="bff09cc0-786d-4dec-baa1-553ae04465e3" name="Default Changelist" comment="&#10;commit">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/UHCListener.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Arena.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/ArenaManager.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/arena/Game.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/arena/Game.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/commands/MainCommand.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/types/EndCrystal.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/EndCrystal.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/entities/types/Leaderboard.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/entities/types/Leaderboard.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/kings/uhc/utils/PluginUtils.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +136,7 @@
       <workItem from="1603459362767" duration="24695000" />
       <workItem from="1603557504380" duration="33479000" />
       <workItem from="1603831747440" duration="16903000" />
-      <workItem from="1603898208898" duration="8159000" />
+      <workItem from="1603898208898" duration="8452000" />
     </task>
     <task id="LOCAL-00001" summary="commit">
       <created>1603307992864</created>
@@ -179,7 +173,14 @@
       <option name="project" value="LOCAL" />
       <updated>1603852387318</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="&#10;commit">
+      <created>1603910297593</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1603910297593</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -243,10 +244,10 @@
       <screen x="0" y="0" width="1366" height="738" />
     </state>
     <state x="184" y="14" key="SettingsEditor/0.0.1366.738@0.0.1366.738" timestamp="1603157166114" />
-    <state x="275" y="98" key="Vcs.Push.Dialog.v2" timestamp="1603852399072">
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2" timestamp="1603910301213">
       <screen x="0" y="0" width="1366" height="738" />
     </state>
-    <state x="275" y="98" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1603852399072" />
+    <state x="275" y="98" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1603910301213" />
     <state x="391" y="57" width="583" height="624" key="find.popup" timestamp="1603905243614">
       <screen x="0" y="0" width="1366" height="738" />
     </state>

@@ -635,12 +635,6 @@ class Arena extends Game implements Listener
                             case 'exit':
                                 $this->disconnectPlayer($event->getPlayer(), "§a§l» §r§7You have successfully left the game!");
                                 break;
-                            case 'second':
-                            case 'pvp':
-                            case 'border':
-                            case 'first':
-                                $event->setCancelled(false);
-                                break;
                             default:
                                 $event->setCancelled(true);
                                 $event->getPlayer()->sendMessage("§c§l» §r§7Use /uhc exit to leave the game.");
